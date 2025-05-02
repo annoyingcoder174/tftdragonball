@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Shop - Dragon Ball Sparkling Zero</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script defer src="scripts/firebaseConfig.js"></script>
+    <script defer src="scripts/shop.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <h1>🛒 Đi Chợ</h1>
+    <label for="round-select">Chọn vòng:</label>
+    <select id="round-select">
+        <option value="1">Vòng 1</option>
+        <option value="3">Vòng 3</option>
+        <option value="5">Vòng 5</option>
+        <option value="7">Vòng 7</option>
+        <option value="9">Vòng 9</option>
+    </select>
+    <button onclick="generateShop()">Hiện tướng</button>
+    <div id="shop-results" class="augment-container"></div>
+</body>
+
+</html>

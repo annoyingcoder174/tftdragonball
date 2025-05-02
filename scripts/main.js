@@ -7,6 +7,53 @@ firebase.auth().onAuthStateChanged(user => {
         firebase.auth().signInAnonymously();
     }
 });
+const environments = [
+    {
+        title: "Trái Đất",
+        desc: "Tất cả người chơi có 1 lượt đổi miễn phí mỗi vòng.",
+        img: "/images/environments/1.webp"
+    },
+    {
+        title: "Hành Tinh Namek",
+        desc: "Tất cả người chơi +5 điểm sinh mệnh mỗi vòng.",
+        img: "/images/environments/2.webp"
+    },
+    {
+        title: "Hành tinh Vegeta",
+        desc: "Tất cả người chơi có 6 ô tướng, và 4 ô chứa tướng.",
+        img: "/images/environments/3.webp"
+    },
+    {
+        title: "Hành tinh Yardrat",
+        desc: "+1 ấn ngẫu nhiên.",
+        img: "/images/environments/4.webp"
+    },
+    {
+        title: "Hành Tinh Cereal",
+        desc: "+1 trang bị.",
+        img: "/images/environments/5.webp"
+    },
+    {
+        title: "Hành tinh của Giới Vương Bắc",
+        desc: "Tất cả người chơi + vàng mỗi vòng.",
+        img: "/images/environments/6.webp"
+    },
+    {
+        title: "Lâu Đài Của Beerus",
+        desc: "Tất cả người chơi +50 exp mỗi vòng",
+        img: "/images/environments/7.webp"
+    },
+    {
+        title: "Điểm vỡ thời gian",
+        desc: "Bỏ qua vòng 3 và vòng 7 (vẫn nhận vàng)",
+        img: "/images/environments/9.webp"
+    },
+    {
+        title: "Vô Diện Giới",
+        desc: "Không có gì xảy ra",
+        img: "/images/environments/8.webp"
+    }
+];
 
 function checkJoinStatus() {
     const user = firebase.auth().currentUser;
@@ -38,12 +85,15 @@ function joinTable() {
     const tableRef = firebase.firestore().collection("tables").doc("sharedTable");
 
     tableRef.get().then(tableDoc => {
-        let nextTiers;
-        if (tableDoc.exists && Array.isArray(tableDoc.data().tiers)) {
-            nextTiers = tableDoc.data().tiers;
+        let nextTiers, selectedEnvironment;
+        if (tableDoc.exists) {
+            const data = tableDoc.data();
+            nextTiers = Array.isArray(data.tiers) ? data.tiers : Array.from({ length: 6 }, () => getRandomTier());
+            selectedEnvironment = data.environment || environments[Math.floor(Math.random() * environments.length)];
         } else {
             nextTiers = Array.from({ length: 6 }, () => getRandomTier());
-            tableRef.set({ tiers: nextTiers }, { merge: true });
+            selectedEnvironment = environments[Math.floor(Math.random() * environments.length)];
+            tableRef.set({ tiers: nextTiers, environment: selectedEnvironment }, { merge: true });
         }
 
         tableRef.collection("players").doc(userId).set({
@@ -67,6 +117,7 @@ function joinTable() {
         });
     });
 }
+
 
 function leaveTable() {
     const user = firebase.auth().currentUser;
@@ -122,11 +173,33 @@ function loadPreviousTables() {
 
 function loadTable() {
     const tbody = document.querySelector("#augment-table tbody");
-
     tbody.innerHTML = "";
 
-    firebase.firestore().collection("tables").doc("sharedTable")
-        .collection("players").get().then(snapshot => {
+    const tableRef = firebase.firestore().collection("tables").doc("sharedTable");
+
+    // Load environment first
+    tableRef.get().then(doc => {
+        if (doc.exists && doc.data().environment) {
+            const env = doc.data().environment;
+            const envHTML = `
+                <div class="augment-hover-wrapper"
+                    onmouseenter="showDesc('env-tooltip')"
+                    onmouseleave="hideDesc('env-tooltip')">
+                    <img src="${env.img}" alt="${env.title}" width="80" height="80">
+                    <div class="augment-desc-hover" id="env-tooltip" style="left: 100px;">
+                        <div class="tooltip-name tier-title-z">${env.title}</div>
+                        <div class="tooltip-desc">${env.desc}</div>
+                    </div>
+                </div>
+            `;
+            const envDisplay = document.getElementById("environment-display");
+            if (envDisplay) {
+                envDisplay.innerHTML = envHTML;
+            }
+        }
+
+        // Then load players
+        tableRef.collection("players").get().then(snapshot => {
             snapshot.forEach(doc => {
                 const data = doc.data();
                 const tr = document.createElement("tr");
@@ -149,8 +222,8 @@ function loadTable() {
 
                     return `
                         <div class="augment-hover-wrapper"
-                             onmouseenter="showDesc('${tooltipId}')"
-                             onmouseleave="hideDesc('${tooltipId}')">
+                            onmouseenter="showDesc('${tooltipId}')"
+                            onmouseleave="hideDesc('${tooltipId}')">
                             <img src="${aug.img}" alt="${aug.name}" width="60" height="60">
                             <div class="augment-desc-hover" id="${tooltipId}">
                                 <div class="tooltip-name ${titleClass}">${aug.name}</div>
@@ -164,7 +237,17 @@ function loadTable() {
                 // Champions
                 const champsHtml = (data.champs || []).map(champ => {
                     const tierClass = `chess-${champ.tier?.toLowerCase() || 'd'}`;
-                    return `<img src="${champ.img}" title="${champ.name}" class="champ-img ${tierClass}">`;
+                    const champImg = `<img src="${champ.img}" title="${champ.name}" class="champ-img ${tierClass}">`;
+                    const itemImg = champ.item ? `<img src="${champ.item}" class="item-img" title="Trang bị">` : "";
+                    const dragonImgs = (champ.dragonBalls || []).map(db => `<img src="${db}" class="db-img" title="Ngọc rồng">`).join("");
+
+                    return `
+                        <div style="display: inline-block; text-align: center; margin: 4px;">
+                            ${champImg}<br>
+                            ${itemImg}<br>
+                            ${dragonImgs}
+                        </div>
+                    `;
                 }).join(" ");
 
 
@@ -173,8 +256,6 @@ function loadTable() {
                 const gold = data.gold ?? 0;
                 const levels = (data.rollLevels || []).join(" / ");
                 const levelText = levels ? `<small><b>Level(s):</b> ${levels}</small><br>` : "";
-
-
 
                 tr.innerHTML = `
                     <td>
@@ -192,7 +273,9 @@ function loadTable() {
                 tbody.appendChild(tr);
             });
         });
+    });
 }
+
 
 function recordWin(winnerId, winnerName) {
     const tableRef = firebase.firestore().collection("tables").doc("sharedTable");

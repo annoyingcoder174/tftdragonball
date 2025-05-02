@@ -1,58 +1,5 @@
-let currentRollLevels = new Set();
-let currentUserRef = null;
-let boughtChamps = [];
-
-const tierChances = {
-    1: { D: 85, C: 15 },
-    2: { D: 60, C: 25, B: 15 },
-    3: { D: 40, C: 35, B: 24, A: 1 },
-    4: { D: 25, C: 35, B: 30, A: 10 },
-    5: { D: 15, C: 29, B: 30, A: 20, S: 10, Z: 1 },
-    6: { D: 12, C: 20, B: 20, A: 30, S: 12, Z: 6 },
-    7: { D: 8.5, C: 15, B: 20, A: 25, S: 20, Z: 11, GOD: 0.5 },
-    8: { D: 5, C: 9, B: 18, A: 25, S: 22, Z: 18, GOD: 3 },
-    9: { D: 3.5, C: 9, B: 15, A: 23, S: 25, Z: 20, GOD: 4.5 }
-};
-function getSellRefund(cost) {
-    switch (cost) {
-        case 1: return 1;
-        case 2: return 2;
-        case 3:
-        case 4: return 3;
-        case 5:
-        case 6: return 4;
-        case 7: return 5;
-        case 8:
-        case 9: return 6;
-        case 10: return 7;
-        case 12: return 8;
-        case 15: return 0;
-        default: return 0;
-    }
-}
-firebase.auth().onAuthStateChanged(user => {
-    if (user) {
-        currentUserRef = firebase.firestore()
-            .collection("tables").doc("sharedTable")
-            .collection("players").doc(user.uid);
-
-        currentUserRef.get().then(doc => {
-            if (doc.exists) {
-                const data = doc.data();
-                const gold = data.gold || 0;
-                document.getElementById("gold-display").textContent = `Vàng: ${gold}`;
-
-                // 🔁 Restore previously bought champs on reload
-                boughtChamps = data.champs || [];
-                displayBoughtChamps();
-            }
-        });
-    }
-});
-
-
-
-
+// shop.js
+// Dependencies: champions and tierChances copied from rollChamp.js
 const champions = {
     D: [
         { name: "Mr Satan", cost: 1, img: "images/champs/1.webp", tier: "D" },
@@ -263,133 +210,89 @@ const champions = {
         { name: "SSJ4 Gogeta", cost: 15, img: "images/champs/195.webp", tier: "GOD" }
     ]
 };
+// shop.js
+// shop.js
+// Dependencies: champions and tierChances copied from rollChamp.js
+// Assumes firebaseConfig.js is already loaded
 
 
 
-function getRandomTier(level) {
-    const pool = tierChances[level];
-    const rand = Math.random() * 100;
-    let sum = 0;
-    for (let tier in pool) {
-        sum += pool[tier];
-        if (rand <= sum) return tier;
+// Firebase must already be initialized via firebaseConfig.js
+const db = firebase.firestore();
+let currentUser;
+
+firebase.auth().onAuthStateChanged(user => {
+    if (user) currentUser = user;
+    else firebase.auth().signInAnonymously();
+});
+
+const items = [
+    "Găng năng lượng", "Khiên Plasma", "Radar Rồng", "Cánh thiên thần", "Lò phản ứng mini",
+    "Áo giáp Xên", "Giày Bay", "Hạt đậu thần", "Bình hồi phục", "Bộ phát sóng ki"
+];
+
+const dragonBalls = [
+    "images/dragonballs/1.png", "images/dragonballs/2.png", "images/dragonballs/3.png",
+    "images/dragonballs/4.png", "images/dragonballs/5.jpg", "images/dragonballs/6.png",
+    "images/dragonballs/7.png"
+];
+
+function getRandomDragonBalls() {
+    const count = Math.random() < 0.5 ? 1 : 2;
+    const result = [];
+    for (let i = 0; i < count; i++) {
+        const idx = Math.floor(Math.random() * dragonBalls.length);
+        result.push(dragonBalls[idx]);
     }
-    return "D";
-}
-function handleLevelInput() {
-    const level = parseInt(document.getElementById("player-level").value);
-    if (!level || level < 1 || level > 9 || boughtChamps.length > 0) return;
-
-    showTierPercentages(level); // 👈 add this line
-
-    const rolled = Array.from({ length: 5 }, () => {
-        const tier = getRandomTier(level);
-        const pool = champions[tier];
-        return { ...pool[Math.floor(Math.random() * pool.length)] };
-    });
-
-    displayChampions(rolled);
+    return result;
 }
 
-function showTierPercentages(level) {
-    const tierDisplay = document.getElementById("tier-percentages");
-    const tierData = {
-        1: [{ tier: "D", rate: 85 }, { tier: "C", rate: 15 }],
-        2: [{ tier: "D", rate: 60 }, { tier: "C", rate: 25 }, { tier: "B", rate: 15 }],
-        3: [{ tier: "D", rate: 40 }, { tier: "C", rate: 35 }, { tier: "B", rate: 24 }, { tier: "A", rate: 1 }],
-        4: [{ tier: "D", rate: 25 }, { tier: "C", rate: 35 }, { tier: "B", rate: 30 }, { tier: "A", rate: 10 }],
-        5: [{ tier: "D", rate: 15 }, { tier: "C", rate: 29 }, { tier: "B", rate: 30 }, { tier: "A", rate: 20 }, { tier: "S", rate: 10 }, { tier: "Z", rate: 1 }],
-        6: [{ tier: "D", rate: 12 }, { tier: "C", rate: 20 }, { tier: "B", rate: 20 }, { tier: "A", rate: 30 }, { tier: "S", rate: 12 }, { tier: "Z", rate: 6 }],
-        7: [{ tier: "D", rate: 8.5 }, { tier: "C", rate: 15 }, { tier: "B", rate: 20 }, { tier: "A", rate: 25 }, { tier: "S", rate: 20 }, { tier: "Z", rate: 11 }, { tier: "GOD", rate: 0.5 }],
-        8: [{ tier: "D", rate: 5 }, { tier: "C", rate: 9 }, { tier: "B", rate: 18 }, { tier: "A", rate: 25 }, { tier: "S", rate: 22 }, { tier: "Z", rate: 18 }, { tier: "GOD", rate: 3 }],
-        9: [{ tier: "D", rate: 3.5 }, { tier: "C", rate: 9 }, { tier: "B", rate: 15 }, { tier: "A", rate: 23 }, { tier: "S", rate: 25 }, { tier: "Z", rate: 20 }, { tier: "GOD", rate: 4.5 }]
-    };
-
-    const rates = tierData[level];
-    if (!rates) {
-        tierDisplay.innerHTML = "";
-        return;
+function getRoundComposition(round) {
+    if (round == 1) return { D: 5, C: 3, B: 2 };
+    if (round == 3) return { D: 4, C: 2, B: 3, A: 1 };
+    if (round == 5) return { D: 2, C: 2, B: 3, A: 2, S: 1 };
+    if (round == 7) return { D: 1, C: 1, B: 2, A: 3, S: 2, Z: 1 };
+    if (round == 9) {
+        return Math.random() < 0.7
+            ? { D: 1, C: 1, B: 1, A: 3, S: 2, Z: 2 }
+            : { D: 1, C: 1, B: 1, A: 3, S: 2, Z: 1, GOD: 1 };
     }
-
-    tierDisplay.innerHTML = rates.map(r =>
-        `<span class="chess-${r.tier.toLowerCase()}"><b>${r.tier}:</b> ${r.rate}%</span>`
-    ).join(" | ");
+    return {};
 }
 
+function generateShop() {
+    const round = parseInt(document.getElementById("round-select").value);
+    const composition = getRoundComposition(round);
+    const championsToShow = [];
 
-
-function rollChampions() {
-    const level = parseInt(document.getElementById("player-level").value);
-    if (!level || level < 1 || level > 9) return;
-
-    if (!currentRollLevels.has(level)) {
-        if (currentRollLevels.size >= 2) {
-            alert("Chỉ được dùng tối đa 2 cấp độ cùng lúc! Nhấn 'Hoàn tất' để reset.");
-            return;
+    for (const tier in composition) {
+        const count = composition[tier];
+        const pool = champions[tier] || [];
+        for (let i = 0; i < count; i++) {
+            const champ = { ...pool[Math.floor(Math.random() * pool.length)] };
+            champ.dragonBalls = getRandomDragonBalls();
+            champ.item = items[Math.floor(Math.random() * items.length)];
+            championsToShow.push(champ);
         }
-        currentRollLevels.add(level);
     }
 
-    if (!currentUserRef) return;
-
-    currentUserRef.get().then(doc => {
-        if (!doc.exists) return;
-        const data = doc.data();
-        const gold = data.gold || 0;
-        const previousLevels = data.rollLevels || [];
-
-        if (gold < 2) return;
-
-        // Update rollLevels to contain max 2 unique recent levels
-        const updatedLevels = [...new Set([level, ...previousLevels])].slice(0, 2);
-
-        // Save updated gold and levels
-        currentUserRef.update({
-            gold: gold - 2,
-            rollLevels: updatedLevels
-        });
-
-        // Display gold
-        document.getElementById("gold-display").textContent = `Vàng: ${gold - 2}`;
-
-        // Generate champions
-        const rolled = Array.from({ length: 5 }, () => {
-            const tier = getRandomTier(level);
-            const pool = champions[tier];
-            return { ...pool[Math.floor(Math.random() * pool.length)] };
-        });
-
-        displayChampions(rolled);
-    });
+    displayShopChampions(championsToShow);
 }
 
-
-function displayChampions(rolled) {
-    const container = document.getElementById("champion-options");
+function displayShopChampions(champs) {
+    const container = document.getElementById("shop-results");
     container.innerHTML = "";
 
-    rolled.forEach(champ => {
+    champs.forEach(champ => {
         const card = document.createElement("div");
         card.className = "augment-card";
-        const tier = champ.tier?.toLowerCase();
-        card.classList.add(`card-tier-${tier}`);
-
-
-        if (champ.tier === "Z") {
-            card.classList.add("card-tier-z");
-        }
-        else if (champ.tier === "GOD") {
-            card.classList.add("card-tier-god");
-        }
-        else if (champ.tier === "S") {
-            card.classList.add("card-tier-s");
-        }
+        card.classList.add(`card-tier-${champ.tier.toLowerCase()}`);
+        card.style.cursor = "pointer";
 
         const img = document.createElement("img");
         img.src = champ.img;
         img.alt = champ.name;
-        const tierClass = `chess-${champ.tier?.toLowerCase() || 'd'}`;
-        img.className = `champ-img ${tierClass}`;
+        img.className = `champ-img chess-${champ.tier.toLowerCase()}`;
 
         const name = document.createElement("div");
         name.className = "augment-name";
@@ -399,147 +302,44 @@ function displayChampions(rolled) {
         desc.className = "augment-desc";
         desc.innerHTML = `Bậc: ${champ.tier}<br>Giá: ${champ.cost} vàng`;
 
-        const buyBtn = document.createElement("button");
-        buyBtn.textContent = "Mua";
-        buyBtn.onclick = () => buyChampion(champ);
+        const dragonBallContainer = document.createElement("div");
+        champ.dragonBalls.forEach(db => {
+            const dbImg = document.createElement("img");
+            dbImg.src = db;
+            dbImg.alt = "Ngọc rồng";
+            dbImg.style.width = "30px";
+            dbImg.style.margin = "0 3px";
+            dragonBallContainer.appendChild(dbImg);
+        });
+
+        const itemInfo = document.createElement("div");
+        itemInfo.innerHTML = `<b>Vật phẩm:</b> ${champ.item}`;
 
         card.appendChild(img);
         card.appendChild(name);
         card.appendChild(desc);
-        card.appendChild(buyBtn);
+        card.appendChild(dragonBallContainer);
+        card.appendChild(itemInfo);
+
+        card.onclick = async () => {
+            if (!currentUser) return alert("Chưa đăng nhập!");
+            const uid = currentUser.uid;
+            const tableRef = db.collection("currentTable").doc("shared");
+            const playerRef = tableRef.collection("players").doc(uid);
+
+            await playerRef.set({
+                champ: {
+                    name: champ.name,
+                    img: champ.img,
+                    tier: champ.tier,
+                    item: champ.item,
+                    dragonBalls: champ.dragonBalls
+                }
+            }, { merge: true });
+
+            window.location.href = "main.html";
+        };
+
         container.appendChild(card);
     });
 }
-
-function buyChampion(champ) {
-    if (!currentUserRef) return;
-
-    currentUserRef.get().then(doc => {
-        if (!doc.exists) return;
-        const data = doc.data();
-        const gold = data.gold || 0;
-        if (gold < champ.cost) return;
-
-        currentUserRef.update({ gold: gold - champ.cost });
-        boughtChamps.push(champ);
-        displayBoughtChamps();
-        document.getElementById("gold-display").textContent = `Vàng: ${gold - champ.cost}`;
-    });
-}
-
-function displayBoughtChamps() {
-    const container = document.getElementById("bought-champions");
-    container.innerHTML = "";
-
-    boughtChamps.forEach((champ, i) => {
-        const wrapper = document.createElement("div");
-        wrapper.style.position = "relative";
-        wrapper.style.display = "inline-block";
-        wrapper.style.margin = "6px";
-
-        const img = document.createElement("img");
-        img.src = champ.img;
-        img.alt = champ.name;
-        img.className = `champ-img chess-${champ.tier?.toLowerCase() || 'd'}`;
-        img.title = champ.name;
-
-        const removeBtn = document.createElement("button");
-        removeBtn.textContent = "×";
-        removeBtn.title = "Bán tướng";
-        removeBtn.style.position = "absolute";
-        removeBtn.style.top = "-4px";
-        removeBtn.style.right = "-4px";
-        removeBtn.style.background = "red";
-        removeBtn.style.color = "white";
-        removeBtn.style.border = "none";
-        removeBtn.style.borderRadius = "50%";
-        removeBtn.style.width = "16px";
-        removeBtn.style.height = "16px";
-        removeBtn.style.fontSize = "10px";
-        removeBtn.style.lineHeight = "14px";
-        removeBtn.style.padding = "0";
-        removeBtn.style.cursor = "pointer";
-        removeBtn.style.zIndex = "10";
-
-        // Use closure-safe index for button
-        removeBtn.addEventListener("click", () => {
-            sellChampion(i, champ.cost);
-        });
-
-        wrapper.appendChild(img);
-        wrapper.appendChild(removeBtn);
-        container.appendChild(wrapper);
-    });
-}
-
-
-function sellChampion(index) {
-    const champ = boughtChamps[index];
-    if (!champ || typeof champ.cost !== "number") return;
-
-    const refundGold = getSellRefund(champ.cost);
-
-    // Remove from local array
-    boughtChamps.splice(index, 1);
-    displayBoughtChamps();
-
-    // Update Firestore: remove the champion from 'champs' array
-    currentUserRef.get().then(doc => {
-        const data = doc.data();
-        const gold = data.gold || 0;
-        const newGold = gold + refundGold;
-        const currentChamps = data.champs || [];
-
-        // Filter out the champion using its unique name
-        const updatedChamps = currentChamps.filter(c => c.name !== champ.name || c.img !== champ.img);
-
-        // Update Firestore with new champ list and new gold value
-        currentUserRef.update({
-            champs: updatedChamps,
-            gold: newGold
-        }).then(() => {
-            const display = document.getElementById("gold-display");
-            if (display) display.textContent = `Vàng: ${newGold}`;
-        });
-    });
-}
-
-
-
-function finishRolling() {
-    if (!currentUserRef) return;
-
-    currentUserRef.get().then(doc => {
-        if (!doc.exists) return;
-
-        const prevChamps = doc.data().champs || [];
-        const newChamps = [...prevChamps, ...boughtChamps];
-
-        currentUserRef.update({
-            champs: newChamps
-        }).then(() => {
-            boughtChamps = [];
-            currentRollLevels.clear();
-            window.location.href = "main.html";
-        });
-    });
-}
-
-function exitToMain() {
-    location.href = "main.html";
-}
-
-firebase.auth().onAuthStateChanged(user => {
-    if (user) {
-        currentUserRef = firebase.firestore()
-            .collection("tables").doc("sharedTable")
-            .collection("players").doc(user.uid);
-
-        currentUserRef.get().then(doc => {
-            if (doc.exists) {
-                const gold = doc.data().gold || 0;
-                document.getElementById("gold-display").textContent = `Vàng: ${gold}`;
-            }
-        });
-    }
-});
