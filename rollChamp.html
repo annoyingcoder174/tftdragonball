@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Đổi Tướng - Dragon Ball Sparkling Zero</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/favicon.png">
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <script defer src="scripts/firebaseConfig.js"></script>
+    <script defer src="scripts/rollChamp.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Đổi Tướng</h1>
+
+        <div class="controls">
+            <label for="player-level">Cấp người chơi:</label>
+            <select id="player-level">
+                <option value="">-- Chọn cấp --</option>
+                <option value="1">Cấp 1</option>
+                <option value="2">Cấp 2</option>
+                <option value="3">Cấp 3</option>
+                <option value="4">Cấp 4</option>
+                <option value="5">Cấp 5</option>
+                <option value="6">Cấp 6</option>
+                <option value="7">Cấp 7</option>
+                <option value="8">Cấp 8</option>
+                <option value="9">Cấp 9</option>
+            </select>
+            <button onclick="rollChampions()">↪️ Đổi lại (2 vàng)</button>
+            <button onclick="exitToMain()">🚪 Thoát</button>
+            <button onclick="finishRolling()">✅ Hoàn tất</button>
+
+            <p id="gold-display">Vàng: ...</p>
+        </div>
+        <h3 style="margin-top: 30px;">Tướng đã mua</h3>
+        <div id="bought-champions" class="augment-container"></div>
+
+
+        <div id="champion-options" class="augment-container"></div>
+    </div>
+</body>
+
+</html>
