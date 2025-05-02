@@ -13,6 +13,25 @@ const tierChances = {
     8: { D: 5, C: 9, B: 18, A: 25, S: 22, Z: 18, GOD: 3 },
     9: { D: 3.5, C: 9, B: 15, A: 23, S: 25, Z: 20, GOD: 4.5 }
 };
+function getSellRefund(cost) {
+    switch (cost) {
+        case 1: return 1;
+        case 2: return 2;
+        case 3:
+        case 4: return 3;
+        case 5:
+        case 6: return 4;
+        case 7: return 5;
+        case 8:
+        case 9: return 6;
+        case 10: return 7;
+        case 12: return 8;
+        case 15: return 0;
+        default: return 0;
+    }
+}
+
+
 
 const champions = {
     D: [
@@ -237,6 +256,47 @@ function getRandomTier(level) {
     }
     return "D";
 }
+function handleLevelInput() {
+    const level = parseInt(document.getElementById("player-level").value);
+    if (!level || level < 1 || level > 9 || boughtChamps.length > 0) return;
+
+    showTierPercentages(level); // 👈 add this line
+
+    const rolled = Array.from({ length: 5 }, () => {
+        const tier = getRandomTier(level);
+        const pool = champions[tier];
+        return { ...pool[Math.floor(Math.random() * pool.length)] };
+    });
+
+    displayChampions(rolled);
+}
+
+function showTierPercentages(level) {
+    const tierDisplay = document.getElementById("tier-percentages");
+    const tierData = {
+        1: [{ tier: "D", rate: 85 }, { tier: "C", rate: 15 }],
+        2: [{ tier: "D", rate: 60 }, { tier: "C", rate: 25 }, { tier: "B", rate: 15 }],
+        3: [{ tier: "D", rate: 40 }, { tier: "C", rate: 35 }, { tier: "B", rate: 24 }, { tier: "A", rate: 1 }],
+        4: [{ tier: "D", rate: 25 }, { tier: "C", rate: 35 }, { tier: "B", rate: 30 }, { tier: "A", rate: 10 }],
+        5: [{ tier: "D", rate: 15 }, { tier: "C", rate: 29 }, { tier: "B", rate: 30 }, { tier: "A", rate: 20 }, { tier: "S", rate: 10 }, { tier: "Z", rate: 1 }],
+        6: [{ tier: "D", rate: 12 }, { tier: "C", rate: 20 }, { tier: "B", rate: 20 }, { tier: "A", rate: 30 }, { tier: "S", rate: 12 }, { tier: "Z", rate: 6 }],
+        7: [{ tier: "D", rate: 8.5 }, { tier: "C", rate: 15 }, { tier: "B", rate: 20 }, { tier: "A", rate: 25 }, { tier: "S", rate: 20 }, { tier: "Z", rate: 11 }, { tier: "GOD", rate: 0.5 }],
+        8: [{ tier: "D", rate: 5 }, { tier: "C", rate: 9 }, { tier: "B", rate: 18 }, { tier: "A", rate: 25 }, { tier: "S", rate: 22 }, { tier: "Z", rate: 18 }, { tier: "GOD", rate: 3 }],
+        9: [{ tier: "D", rate: 3.5 }, { tier: "C", rate: 9 }, { tier: "B", rate: 15 }, { tier: "A", rate: 23 }, { tier: "S", rate: 25 }, { tier: "Z", rate: 20 }, { tier: "GOD", rate: 4.5 }]
+    };
+
+    const rates = tierData[level];
+    if (!rates) {
+        tierDisplay.innerHTML = "";
+        return;
+    }
+
+    tierDisplay.innerHTML = rates.map(r =>
+        `<span class="chess-${r.tier.toLowerCase()}"><b>${r.tier}:</b> ${r.rate}%</span>`
+    ).join(" | ");
+}
+
+
 
 function rollChampions() {
     const level = parseInt(document.getElementById("player-level").value);
@@ -390,7 +450,12 @@ function displayBoughtChamps() {
 }
 
 
-function sellChampion(index, refundGold) {
+function sellChampion(index) {
+    const champ = boughtChamps[index];
+    if (!champ || typeof champ.cost !== "number") return;
+
+    const refundGold = getSellRefund(champ.cost);
+
     boughtChamps.splice(index, 1);
     displayBoughtChamps();
 
@@ -400,7 +465,8 @@ function sellChampion(index, refundGold) {
         const newGold = gold + refundGold;
 
         currentUserRef.update({ gold: newGold }).then(() => {
-            document.getElementById("gold-display").textContent = `Vàng: ${newGold}`;
+            const display = document.getElementById("gold-display");
+            if (display) display.textContent = `Vàng: ${newGold}`;
         });
     });
 }

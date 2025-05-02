@@ -20,7 +20,7 @@
 
         <div class="controls">
             <label for="player-level">Cấp người chơi:</label>
-            <select id="player-level">
+            <select id="player-level" onchange="handleLevelInput()">
                 <option value="">-- Chọn cấp --</option>
                 <option value="1">Cấp 1</option>
                 <option value="2">Cấp 2</option>
@@ -37,6 +37,8 @@
             <button onclick="finishRolling()">✅ Hoàn tất</button>
 
             <p id="gold-display">Vàng: ...</p>
+            <div id="tier-percentages" class="tier-percent-display"></div>
+
         </div>
         <h3 style="margin-top: 30px;">Tướng đã mua</h3>
         <div id="bought-champions" class="augment-container"></div>
