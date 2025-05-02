@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dragon Ball Sparkling Zero!</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/favicon.png" type="image/png">
+
+    <!-- ✅ Firebase SDKs -->
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+    <!-- ✅ Your Firebase config -->
+    <script defer src="scripts/firebaseConfig.js"></script>
+
+    <!-- ✅ Augment logic (MUST come after Firebase) -->
+    <script defer src="scripts/rollAugment.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Dragon Ball Sparkling Zero!</h1>
+
+        <div class="controls">
+            <label for="tier-select">Chọn Bậc:</label>
+            <select id="tier-select">
+                <option value="">-- Chọn bậc --</option>
+                <option value="A">Bậc A</option>
+                <option value="S">Bậc S</option>
+                <option value="Z">Bậc Z</option>
+            </select>
+            <button id="roll-btn">↪ Đổi lại</button>
+            <button onclick="exitToMain()">🚪 Thoát</button>
+        </div>
+        <p id="roll-count">Số lần rút còn lại: 3</p>
+
+        <div id="augment-options" class="augment-container"></div>
+    </div>
+</body>
+
+</html>

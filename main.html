@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dragon Ball Sparkling Zero - Trang chính</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/favicon.png" type="image/png">
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script defer src="scripts/firebaseConfig.js"></script>
+    <script defer src="scripts/main.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Dragon Ball Sparkling Zero!</h1>
+
+        <div class="controls">
+            <label for="display-name">Tên hiển thị:</label>
+            <input type="text" id="display-name" placeholder="Nhập tên của bạn">
+            <button id="join-table-btn" onclick="joinTable()">📝 Tham gia bảng đấu</button>
+            <button id="leave-table-btn" style="display:none;" onclick="leaveTable()">🚪 Rời bảng</button>
+        </div>
+
+        <div id="post-join-buttons" style="display: none;" class="button-group">
+            <button onclick="location.href='rollAugment.html'">🎲 Rút lõi sức mạnh</button>
+            <button onclick="location.href='rollChamp.html'">👊 Rút tướng</button>
+        </div>
+
+        <h2>Bảng đấu hiện tại</h2>
+        <table id="augment-table">
+            <thead>
+                <tr>
+                    <th>Người chơi</th>
+                    <th>Lõi đã chọn</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button onclick="location.href='history.html'">📜 Xem lịch sử</button>
+        <h2>Bảng đã tham gia</h2>
+        <div id="previous-tables">Đang tải...</div>
+    </div>
+</body>
+
+</html>
