@@ -269,7 +269,7 @@ function getRandomDragonBalls() {
 }
 
 function getRoundComposition(round) {
-    if (round == 1) return { D: 5, C: 3, B: 2 };
+    if (round == 1) return { D: 5, C: 4, B: 1 };
     if (round == 3) return { D: 4, C: 2, B: 3, A: 1 };
     if (round == 5) return { D: 2, C: 2, B: 3, A: 2, S: 1 };
     if (round == 7) return { D: 1, C: 1, B: 2, A: 3, S: 2, Z: 1 };
