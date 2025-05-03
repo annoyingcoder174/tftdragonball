@@ -278,10 +278,14 @@ function getRandomTier(level) {
 }
 function handleLevelInput() {
     const level = parseInt(document.getElementById("player-level").value);
-    if (!level || level < 1 || level > 9 || boughtChamps.length > 0) return;
+    if (!level || level < 1 || level > 9) return;
 
-    showTierPercentages(level); // 👈 add this line
+    currentRollLevels.clear(); // Optional: clear previous roll levels on new input
+    currentRollLevels.add(level);
 
+    showTierPercentages(level);
+
+    // Auto-roll 5 champions immediately on input
     const rolled = Array.from({ length: 5 }, () => {
         const tier = getRandomTier(level);
         const pool = champions[tier];
@@ -290,6 +294,7 @@ function handleLevelInput() {
 
     displayChampions(rolled);
 }
+
 
 function showTierPercentages(level) {
     const tierDisplay = document.getElementById("tier-percentages");
@@ -410,6 +415,45 @@ function displayChampions(rolled) {
         container.appendChild(card);
     });
 }
+function displayChampions(rolled) {
+    const container = document.getElementById("champion-options");
+    container.innerHTML = "";
+
+    rolled.forEach((champ, index) => {
+        const card = document.createElement("div");
+        card.className = "augment-card";
+        const tier = champ.tier?.toLowerCase();
+        card.classList.add(`card-tier-${tier}`);
+
+        const img = document.createElement("img");
+        img.src = champ.img;
+        img.alt = champ.name;
+        img.className = `champ-img chess-${tier}`;
+
+        const name = document.createElement("div");
+        name.className = "augment-name";
+        name.textContent = champ.name;
+
+        const desc = document.createElement("div");
+        desc.className = "augment-desc";
+        desc.innerHTML = `Bậc: ${champ.tier}<br>Giá: ${champ.cost} vàng`;
+
+        const buyBtn = document.createElement("button");
+        buyBtn.textContent = "Mua";
+        buyBtn.onclick = () => {
+            buyChampion(champ);
+            buyBtn.disabled = true; // ⛔ disable after buying
+            buyBtn.textContent = "Đã mua";
+        };
+
+        card.appendChild(img);
+        card.appendChild(name);
+        card.appendChild(desc);
+        card.appendChild(buyBtn);
+        container.appendChild(card);
+    });
+}
+
 
 function buyChampion(champ) {
     if (!currentUserRef) return;
