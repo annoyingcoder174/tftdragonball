@@ -252,7 +252,7 @@ const augments = {
         },
         {
             name: "Thần Rồng Khói Đen",
-            desc: "Lượng vàng hiện tại và lượng vàng kiếm được sẽ chuyển thành điểm sinh mệnh. Người chơi có thể sử dụng điểm sinh mệnh để mua bất cứ điều gì. +3/5/8 điểm sinh mệnh mỗi vòng đấu.",
+            desc: "Lượng vàng hiện tại và lượng vàng kiếm được sẽ chuyển thành điểm sinh mệnh. Người chơi có thể sử dụng điểm sinh mệnh để mua bất cứ điều gì. +2/4/6 điểm sinh mệnh mỗi vòng đấu.",
             img: "images/augments/44.webp"
         },
         {
