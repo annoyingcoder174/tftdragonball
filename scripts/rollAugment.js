@@ -222,7 +222,7 @@ const augments = {
         },
         {
             name: "Điều ước cuối cùng của Goku",
-            desc: "Khi người chơi thua, họ sẽ không, thay vào đó, nhận 1 Goku GT SSJ4(và phải sử dụng nó), 15 vàng, và 1 điểm sinh mệnh. Tới cuối trận, người chơi gây thêm 20 thiệt hại lên đối phương.",
+            desc: "Khi người chơi thua, họ sẽ không, thay vào đó, nhận 1 Goku GT SSJ4(và phải sử dụng nó), 30 vàng, và 1 điểm sinh mệnh. Tới cuối trận, người chơi gây thêm 20 thiệt hại lên đối phương.",
             img: "images/augments/38.webp"
         },
         {
