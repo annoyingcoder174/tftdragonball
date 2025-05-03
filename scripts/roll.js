@@ -527,37 +527,37 @@ const environments = [
     {
         title: "Trái Đất",
         desc: "Tất cả người chơi có 1 lượt đổi miễn phí mỗi vòng.",
-        img: "/images/environments/1.webp"
+        img: "/images/environments/1.png"
     },
     {
         title: "Hành Tinh Namek",
         desc: "Tất cả người chơi +5 điểm sinh mệnh mỗi vòng.",
-        img: "/images/environments/2.webp"
+        img: "/images/environments/2.png"
     },
     {
         title: "Hành tinh Vegeta",
         desc: "Tất cả người chơi có 6 ô tướng, và 4 ô chứa tướng.",
-        img: "/images/environments/3.webp"
+        img: "/images/environments/3.png"
     },
     {
         title: "Hành tinh Yardrat",
         desc: "+1 ấn ngẫu nhiên.",
-        img: "/images/environments/4.webp"
+        img: "/images/environments/4.png"
     },
     {
         title: "Hành Tinh Cereal",
         desc: "+1 trang bị.",
-        img: "/images/environments/5.webp"
+        img: "/images/environments/5.png"
     },
     {
         title: "Hành tinh của Giới Vương Bắc",
         desc: "Tất cả người chơi +3 vàng mỗi vòng.",
-        img: "/images/environments/6.webp"
+        img: "/images/environments/6.png"
     },
     {
         title: "Lâu Đài Của Beerus",
         desc: "Tất cả người chơi +50 exp mỗi vòng",
-        img: "/images/environments/7.webp"
+        img: "/images/environments/7.png"
     },
     {
         title: "Điểm vỡ thời gian",
@@ -567,7 +567,7 @@ const environments = [
     {
         title: "Vô Diện Giới",
         desc: "Không có gì xảy ra",
-        img: "/images/environments/8.webp"
+        img: "/images/environments/8.png"
     }
 ];
 
