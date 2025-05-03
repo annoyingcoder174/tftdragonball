@@ -227,15 +227,36 @@ firebase.auth().onAuthStateChanged(user => {
 });
 
 const items = [
-    "Găng năng lượng", "Khiên Plasma", "Radar Rồng", "Cánh thiên thần", "Lò phản ứng mini",
-    "Áo giáp Xên", "Giày Bay", "Hạt đậu thần", "Bình hồi phục", "Bộ phát sóng ki"
+    "./images/items/sword.png",
+    "./images/items/shield.png",
+    "./images/items/boots.png",
+    "./images/items/armor.png",
+    "./images/items/scouter.png",
+    "./images/items/potara.png",
+    "./images/items/senzu.png",
+    "./images/items/glove.png",
+    "./images/items/blaster.png",
+    "./images/items/capsule.png"
 ];
 
 const dragonBalls = [
-    "images/dragonballs/1.png", "images/dragonballs/2.png", "images/dragonballs/3.png",
-    "images/dragonballs/4.png", "images/dragonballs/5.jpg", "images/dragonballs/6.png",
-    "images/dragonballs/7.png"
+    "./images/dragonballs/1.png",
+    "./images/dragonballs/2.png",
+    "./images/dragonballs/3.png",
+    "./images/dragonballs/4.png",
+    "./images/dragonballs/5.jpg",
+    "./images/dragonballs/6.png",
+    "./images/dragonballs/7.png"
 ];
+
+function getRandomItem() {
+    return items[Math.floor(Math.random() * itemPool.length)];
+}
+
+function getRandomDragonBalls() {
+    const shuffled = [...dragonBalls].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, Math.floor(Math.random() * 2) + 1); // 1 or 2 DBs
+}
 
 function getRandomDragonBalls() {
     const count = Math.random() < 0.5 ? 1 : 2;
@@ -259,6 +280,27 @@ function getRoundComposition(round) {
     }
     return {};
 }
+function chooseChampion(champ) {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    // Add item and dragon balls to champion
+    champ.item = getRandomItem();
+    champ.dragonBalls = getRandomDragonBalls();
+
+    const userRef = firebase.firestore()
+        .collection("tables").doc("sharedTable")
+        .collection("players").doc(user.uid);
+
+    userRef.get().then(doc => {
+        const existing = doc.exists && Array.isArray(doc.data().champs) ? doc.data().champs : [];
+        const updated = [...existing, champ];
+
+        userRef.update({ champs: updated }).then(() => {
+            window.location.href = "main.html";
+        });
+    });
+}
 
 function generateShop() {
     const round = parseInt(document.getElementById("round-select").value);
@@ -278,6 +320,70 @@ function generateShop() {
 
     displayShopChampions(championsToShow);
 }
+function chooseChampion(champ) {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    champ.item = champ.item || getRandomItem();
+    champ.dragonBalls = champ.dragonBalls || getRandomDragonBalls();
+
+    const userRef = db.collection("tables").doc("sharedTable").collection("players").doc(user.uid);
+    userRef.get().then(doc => {
+        const existing = doc.exists && Array.isArray(doc.data().champs) ? doc.data().champs : [];
+        const updated = [...existing, champ];
+        boughtChamps = updated;
+        userRef.update({ champs: updated }).then(() => {
+            displayBoughtChamps(); // Refresh the display
+        });
+    });
+}
+
+function displayBoughtChamps() {
+    const container = document.getElementById("bought-champs");
+    if (!container) return;
+    container.innerHTML = "";
+
+    boughtChamps.forEach((champ, index) => {
+        const wrapper = document.createElement("div");
+        wrapper.style.position = "relative";
+        wrapper.style.display = "inline-block";
+        wrapper.style.margin = "6px";
+
+        const img = document.createElement("img");
+        img.src = champ.img;
+        img.className = `champ-img chess-${champ.tier.toLowerCase()}`;
+        img.title = champ.name;
+
+        const sellBtn = document.createElement("button");
+        sellBtn.textContent = "×";
+        sellBtn.title = "Bán tướng";
+        sellBtn.style.position = "absolute";
+        sellBtn.style.top = "-4px";
+        sellBtn.style.right = "-4px";
+        sellBtn.style.background = "red";
+        sellBtn.style.color = "white";
+        sellBtn.style.border = "none";
+        sellBtn.style.borderRadius = "50%";
+        sellBtn.style.width = "16px";
+        sellBtn.style.height = "16px";
+        sellBtn.style.fontSize = "10px";
+        sellBtn.style.lineHeight = "14px";
+        sellBtn.style.padding = "0";
+        sellBtn.style.cursor = "pointer";
+
+        sellBtn.onclick = async () => {
+            boughtChamps.splice(index, 1);
+            const userRef = db.collection("tables").doc("sharedTable").collection("players").doc(currentUser.uid);
+            await userRef.update({ champs: boughtChamps });
+            displayBoughtChamps();
+        };
+
+        wrapper.appendChild(img);
+        wrapper.appendChild(sellBtn);
+        container.appendChild(wrapper);
+    });
+}
+
 
 function displayShopChampions(champs) {
     const container = document.getElementById("shop-results");
@@ -324,21 +430,27 @@ function displayShopChampions(champs) {
         card.onclick = async () => {
             if (!currentUser) return alert("Chưa đăng nhập!");
             const uid = currentUser.uid;
-            const tableRef = db.collection("currentTable").doc("shared");
+            const tableRef = db.collection("tables").doc("sharedTable");
             const playerRef = tableRef.collection("players").doc(uid);
 
-            await playerRef.set({
-                champ: {
-                    name: champ.name,
-                    img: champ.img,
-                    tier: champ.tier,
-                    item: champ.item,
-                    dragonBalls: champ.dragonBalls
-                }
-            }, { merge: true });
+            const selectedChamp = {
+                name: champ.name,
+                img: champ.img,
+                tier: champ.tier,
+                item: champ.item,
+                dragonBalls: champ.dragonBalls
+            };
+
+            const playerDoc = await playerRef.get();
+            const existing = playerDoc.exists && Array.isArray(playerDoc.data().champs) ? playerDoc.data().champs : [];
+
+            await playerRef.update({
+                champs: [...existing, selectedChamp]
+            });
 
             window.location.href = "main.html";
         };
+
 
         container.appendChild(card);
     });

@@ -234,12 +234,13 @@ function loadTable() {
                     `;
                 }).join(" ");
 
-                // Champions
+                // Champions with tier frame, item & dragon balls
                 const champsHtml = (data.champs || []).map(champ => {
                     const tierClass = `chess-${champ.tier?.toLowerCase() || 'd'}`;
                     const champImg = `<img src="${champ.img}" title="${champ.name}" class="champ-img ${tierClass}">`;
                     const itemImg = champ.item ? `<img src="${champ.item}" class="item-img" title="Trang bị">` : "";
-                    const dragonImgs = (champ.dragonBalls || []).map(db => `<img src="${db}" class="db-img" title="Ngọc rồng">`).join("");
+                    const dragonImgs = (champ.dragonBalls || []).map(db =>
+                        `<img src="${db}" class="db-img" title="Ngọc rồng">`).join("");
 
                     return `
                         <div style="display: inline-block; text-align: center; margin: 4px;">
@@ -250,31 +251,40 @@ function loadTable() {
                     `;
                 }).join(" ");
 
-
                 const winButton = `<button onclick="recordWin('${doc.id}', '${data.name}')">${data.name} Thắng</button>`;
                 const nextTiers = data.nextTiers ? data.nextTiers.join(", ") : "Không có";
                 const gold = data.gold ?? 0;
                 const levels = (data.rollLevels || []).join(" / ");
                 const levelText = levels ? `<small><b>Level(s):</b> ${levels}</small><br>` : "";
 
+                const champs = data.champs || [];
+                const champImgs = champs.map(c => `<img src="${c.img}" class="champ-img chess-${c.tier?.toLowerCase() || 'd'}" title="${c.name}">`).join(" ");
+                const itemImgs = champs.map(c => c.item ? `<img src="${c.item}" class="item-img" title="Trang bị">` : "").join(" ");
+                const dragonImgs = champs.flatMap(c => (c.dragonBalls || []).map(db => `<img src="${db}" class="db-img" title="Ngọc rồng">`)).join(" ");
+
                 tr.innerHTML = `
-                    <td>
-                        ${data.name}<br>
-                        ${levelText}<br>
-                        ${winButton}<br>
-                        <label>Vàng:</label>
-                        <input type="number" value="${gold}" min="0"
-                            onchange="updateGold('${doc.id}', this.value)" style="width: 60px;"><br>
-                        <small><b>6 lõi sắp tới:</b> ${nextTiers}</small><br>
-                        <b>Tướng đã mua:</b><br>${champsHtml}
-                    </td>
-                    <td>${augmentsHtml}</td>
-                `;
+    <td>
+        <b>${data.name}</b><br>
+        ${levelText}
+        <label>Vàng:</label>
+        <input type="number" value="${gold}" min="0"
+            onchange="updateGold('${doc.id}', this.value)" style="width: 60px;"><br>
+        <small><b>6 lõi sắp tới:</b> ${nextTiers}</small><br><br>
+        ${winButton}
+    </td>
+    <td>${augmentsHtml}</td>
+    <td>${champImgs}</td>
+    <td>${itemImgs}</td>
+    <td>${dragonImgs}</td>
+`;
+
+
                 tbody.appendChild(tr);
             });
         });
     });
 }
+
 
 
 function recordWin(winnerId, winnerName) {

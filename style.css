@@ -674,6 +674,26 @@ td img {
     color: #4a1a5a;
 }
 
+#augment-table td {
+    vertical-align: top;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+#augment-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.champ-img,
+.item-img,
+.db-img {
+    max-height: 40px;
+    margin: 2px;
+}
+
+
 .augment-desc-hover {
     position: absolute;
     display: none;
@@ -740,5 +760,29 @@ td img {
     object-fit: cover;
     border-radius: 8px;
     border: 2px solid #fff;
+    margin: 2px;
+}
+
+.table-container {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+#augment-table {
+    border-collapse: collapse;
+    width: max-content;
+    min-width: 900px;
+}
+
+#augment-table td {
+    vertical-align: top;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+.champ-img,
+.item-img,
+.db-img {
+    height: 40px;
     margin: 2px;
 }

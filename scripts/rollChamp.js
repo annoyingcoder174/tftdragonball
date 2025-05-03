@@ -423,6 +423,11 @@ function buyChampion(champ) {
         currentUserRef.update({ gold: gold - champ.cost });
         boughtChamps.push(champ);
         displayBoughtChamps();
+        currentUserRef.update({
+            gold: gold - champ.cost,
+            champs: boughtChamps
+        });
+
         document.getElementById("gold-display").textContent = `Vàng: ${gold - champ.cost}`;
     });
 }
@@ -446,25 +451,67 @@ function displayBoughtChamps() {
         const removeBtn = document.createElement("button");
         removeBtn.textContent = "×";
         removeBtn.title = "Bán tướng";
-        removeBtn.style.position = "absolute";
-        removeBtn.style.top = "-4px";
-        removeBtn.style.right = "-4px";
-        removeBtn.style.background = "red";
-        removeBtn.style.color = "white";
-        removeBtn.style.border = "none";
-        removeBtn.style.borderRadius = "50%";
-        removeBtn.style.width = "16px";
-        removeBtn.style.height = "16px";
-        removeBtn.style.fontSize = "10px";
-        removeBtn.style.lineHeight = "14px";
-        removeBtn.style.padding = "0";
-        removeBtn.style.cursor = "pointer";
-        removeBtn.style.zIndex = "10";
-
-        // Use closure-safe index for button
-        removeBtn.addEventListener("click", () => {
-            sellChampion(i, champ.cost);
+        Object.assign(removeBtn.style, {
+            position: "absolute",
+            top: "-4px",
+            right: "-4px",
+            background: "red",
+            color: "white",
+            border: "none",
+            borderRadius: "50%",
+            width: "16px",
+            height: "16px",
+            fontSize: "10px",
+            lineHeight: "14px",
+            padding: "0",
+            cursor: "pointer",
+            zIndex: "10"
         });
+
+        removeBtn.addEventListener("click", () => sellChampion(i));
+
+        wrapper.appendChild(img);
+        wrapper.appendChild(removeBtn);
+        container.appendChild(wrapper);
+    });
+}
+function displayBoughtChamps() {
+    const container = document.getElementById("bought-champions");
+    container.innerHTML = "";
+
+    boughtChamps.forEach((champ, i) => {
+        const wrapper = document.createElement("div");
+        wrapper.style.position = "relative";
+        wrapper.style.display = "inline-block";
+        wrapper.style.margin = "6px";
+
+        const img = document.createElement("img");
+        img.src = champ.img;
+        img.alt = champ.name;
+        img.className = `champ-img chess-${champ.tier?.toLowerCase() || 'd'}`;
+        img.title = champ.name;
+
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "×";
+        removeBtn.title = "Bán tướng";
+        Object.assign(removeBtn.style, {
+            position: "absolute",
+            top: "-4px",
+            right: "-4px",
+            background: "red",
+            color: "white",
+            border: "none",
+            borderRadius: "50%",
+            width: "16px",
+            height: "16px",
+            fontSize: "10px",
+            lineHeight: "14px",
+            padding: "0",
+            cursor: "pointer",
+            zIndex: "10"
+        });
+
+        removeBtn.addEventListener("click", () => sellChampion(i));
 
         wrapper.appendChild(img);
         wrapper.appendChild(removeBtn);
@@ -472,37 +519,39 @@ function displayBoughtChamps() {
     });
 }
 
-
 function sellChampion(index) {
     const champ = boughtChamps[index];
     if (!champ || typeof champ.cost !== "number") return;
 
     const refundGold = getSellRefund(champ.cost);
 
-    // Remove from local array
+    // Remove locally
     boughtChamps.splice(index, 1);
     displayBoughtChamps();
 
-    // Update Firestore: remove the champion from 'champs' array
+    // Update Firestore
     currentUserRef.get().then(doc => {
+        if (!doc.exists) return;
         const data = doc.data();
         const gold = data.gold || 0;
-        const newGold = gold + refundGold;
         const currentChamps = data.champs || [];
 
-        // Filter out the champion using its unique name
-        const updatedChamps = currentChamps.filter(c => c.name !== champ.name || c.img !== champ.img);
+        // Match champ by image + name to remove from Firestore
+        const updatedChamps = currentChamps.filter(c =>
+            !(c.name === champ.name && c.img === champ.img)
+        );
 
-        // Update Firestore with new champ list and new gold value
         currentUserRef.update({
-            champs: updatedChamps,
-            gold: newGold
+            gold: gold + refundGold,
+            champs: updatedChamps
         }).then(() => {
             const display = document.getElementById("gold-display");
-            if (display) display.textContent = `Vàng: ${newGold}`;
+            if (display) display.textContent = `Vàng: ${gold + refundGold}`;
         });
     });
 }
+
+
 
 
 
