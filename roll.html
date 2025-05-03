@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Omni Roller</title>
+    <link rel="stylesheet" href=" style.css" />
+    <link rel="icon" href="images/favicon.png" type="image/png">
+</head>
+
+<body>
+
+    <h1>🎲 Máy Quay Vạn Năng</h1>
+
+    <select id="roll-type">
+        <option value="rollChamp">-- Quay tất cả tướng --</option>
+        <option value="D">D</option>
+        <option value="C">C</option>
+        <option value="B">B</option>
+        <option value="A">A</option>
+        <option value="S">S</option>
+        <option value="Z">Z</option>
+        <option value="GOD">GOD</option>
+        <option value="dragonBall">Ngọc Rồng</option>
+        <option value="augment">Ấn</option>
+        <option value="environment">Môi Trường</option>
+        <option value="coreZ">Lõi Z</option>
+        <option value="coreS">Lõi S</option>
+        <option value="coreA">Lõi A</option>
+    </select>
+
+    <br>
+    <button onclick="rollBasedOnSelection()">Roll</button>
+    <button onclick="location.href='main.html'">🚪Về Trang Chính</button>
+
+    <div id="roll-results" class="roll-grid"></div>
+
+    <script src="scripts/roll.js"></script>
+
+</body>
+
+</html>

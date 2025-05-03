@@ -18,7 +18,7 @@ const dragonBallPool = [
     { name: "Ngọc Rồng 2 Sao", cost: 0, img: "images/dragonballs/2.png", tier: "dragonBall" },
     { name: "Ngọc Rồng 3 Sao", cost: 0, img: "images/dragonballs/3.png", tier: "dragonBall" },
     { name: "Ngọc Rồng 4 Sao", cost: 0, img: "images/dragonballs/4.png", tier: "dragonBall" },
-    { name: "Ngọc Rồng 5 Sao", cost: 0, img: "images/dragonballs/5.jpg", tier: "dragonBall" },
+    { name: "Ngọc Rồng 5 Sao", cost: 0, img: "images/dragonballs/5.png", tier: "dragonBall" },
     { name: "Ngọc Rồng 6 Sao", cost: 0, img: "images/dragonballs/6.png", tier: "dragonBall" },
     { name: "Ngọc Rồng 7 Sao", cost: 0, img: "images/dragonballs/7.png", tier: "dragonBall" }
 ];

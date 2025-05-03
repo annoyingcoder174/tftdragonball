@@ -35,7 +35,7 @@ const environments = [
     },
     {
         title: "Hành tinh của Giới Vương Bắc",
-        desc: "Tất cả người chơi + vàng mỗi vòng.",
+        desc: "Tất cả người chơi +3 vàng mỗi vòng.",
         img: "/images/environments/6.webp"
     },
     {
@@ -84,18 +84,12 @@ function joinTable() {
 
     const tableRef = firebase.firestore().collection("tables").doc("sharedTable");
 
-    tableRef.get().then(tableDoc => {
-        let nextTiers, selectedEnvironment;
-        if (tableDoc.exists) {
-            const data = tableDoc.data();
-            nextTiers = Array.isArray(data.tiers) ? data.tiers : Array.from({ length: 6 }, () => getRandomTier());
-            selectedEnvironment = data.environment || environments[Math.floor(Math.random() * environments.length)];
-        } else {
-            nextTiers = Array.from({ length: 6 }, () => getRandomTier());
-            selectedEnvironment = environments[Math.floor(Math.random() * environments.length)];
-            tableRef.set({ tiers: nextTiers, environment: selectedEnvironment }, { merge: true });
-        }
+    // Always generate new tiers and environment on join
+    const nextTiers = Array.from({ length: 6 }, () => getRandomTier());
+    const selectedEnvironment = environments[Math.floor(Math.random() * environments.length)];
 
+    // Set new values for all users
+    tableRef.set({ tiers: nextTiers, environment: selectedEnvironment }, { merge: true }).then(() => {
         tableRef.collection("players").doc(userId).set({
             name: userName,
             augments: [],
@@ -117,6 +111,7 @@ function joinTable() {
         });
     });
 }
+
 
 
 function leaveTable() {

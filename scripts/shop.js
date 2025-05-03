@@ -244,7 +244,7 @@ const dragonBalls = [
     "./images/dragonballs/2.png",
     "./images/dragonballs/3.png",
     "./images/dragonballs/4.png",
-    "./images/dragonballs/5.jpg",
+    "./images/dragonballs/5.png",
     "./images/dragonballs/6.png",
     "./images/dragonballs/7.png"
 ];

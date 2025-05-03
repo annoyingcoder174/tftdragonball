@@ -21,7 +21,7 @@ const augments = {
     A: [
         {
             name: "Đoàn Quân Ruy Băng Đỏ",
-            desc: "Nhận (15/20/30) vàng trong vòng đấu này nhưng sẽ biến mất khi hết vòng.",
+            desc: "Nhận (12/18/25) vàng trong vòng đấu này nhưng sẽ biến mất khi hết vòng.",
             img: "images/augments/1.jpg"
         },
         {
@@ -41,7 +41,7 @@ const augments = {
         },
         {
             name: "Quy Lão Trường Thọ",
-            desc: "+(10/15/18) điểm sinh mệnh trong vòng đấu này, kết thúc vòng đấu 6, +15 điểm sinh mệnh cho bạn và +10 cho đối thủ",
+            desc: "+(10/15/18) điểm sinh mệnh trong vòng đấu này, kết thúc vòng đấu 6, +15 điểm sinh mệnh cho bạn và +5 cho đối thủ",
             img: "images/augments/5.png"
         },
         {
@@ -51,17 +51,17 @@ const augments = {
         },
         {
             name: "Sinh nhật Bulma",
-            desc: "Nhận (7/10/15) vàng vòng đấu này, thêm 15 vàng vào đầu vòng 6.",
+            desc: "Nhận (5/8/15) vàng vòng đấu này, thêm 15 vàng vào đầu vòng 6.",
             img: "images/augments/7.webp"
         },
         {
             name: "Đậu Thần Senzu",
-            desc: "Hồi điểm sinh mệnh cho người chơi 3/5/10(+1/2/4) mỗi vòng đấu.",
+            desc: "Hồi điểm sinh mệnh cho người chơi 3/7/12(+1/2/4) mỗi vòng đấu.",
             img: "images/augments/8.webp"
         },
         {
             name: "Tầm nhìn của Thượng Đế",
-            desc: "Nhận 1 tướng Bậc A vòng đấu này (bạn được chọn) nhưng sẽ mất trong 2 vòng tiếp theo, nhận 7/10/20 vàng.",
+            desc: "Nhận 1 tướng Bậc A vòng đấu này (bạn được chọn) nhưng sẽ mất trong 2 vòng tiếp theo, nhận 5/8/18 vàng.",
             img: "images/augments/9.webp"
         },
         {
@@ -76,7 +76,7 @@ const augments = {
         },
         {
             name: "Phù Thủy Độc Ác Babidi",
-            desc: "Mỗi vòng đấu, bạn nhận được 1 hiệu ứng ngẫu nhiên của môi trường. Nhận 7/10/12 vàng.",
+            desc: "Mỗi vòng đấu, bạn nhận được 1 hiệu ứng ngẫu nhiên của môi trường. Nhận 5/7/10 vàng.",
             img: "images/augments/12.webp"
         },
         {
@@ -86,7 +86,7 @@ const augments = {
         },
         {
             name: "Kéo, Búa, Bao",
-            desc: "Cả 2 người chơi ra sân với 1 tướng trong 2 vòng đấu. Nhận 7/9/12 vàng.",
+            desc: "Cả 2 người chơi ra sân với 1 tướng trong 2 vòng đấu. Nhận 6/9/12 vàng.",
             img: "images/augments/14.webp"
         },
         {
@@ -101,7 +101,7 @@ const augments = {
         },
         {
             name: "Điều ước của Oolong",
-            desc: "-30/25/20 điểm sinh mệnh để nhận 20/25/30 vàng hoặc -35/35/30 điểm sinh mệnh để nhận 25/30/35 vàng",
+            desc: "-30/25/20 điểm sinh mệnh để nhận 18/25/30 vàng hoặc -40/35/30 điểm sinh mệnh để nhận 25/30/35 vàng",
             img: "images/augments/17.webp"
         },
         {
@@ -111,7 +111,7 @@ const augments = {
         },
         {
             name: "Cha con Panzy",
-            desc: "Nhận 1 Panzy, +5/10/15 vàng mỗi vòng khi có Panzy trong đội hình.",
+            desc: "Nhận 1 Panzy, +3/5/12 vàng mỗi vòng khi có Panzy trong đội hình.",
             img: "images/augments/59.jpg"
         },
 
@@ -133,18 +133,13 @@ const augments = {
             img: "images/augments/21.webp"
         },
         {
-            name: "Biệt Đội Kiêu Hùng xuất hiện!!!",
-            desc: "Nhận 1 Jiren, Toppo, Dyspo. Trả 12 vàng.",
-            img: "images/augments/22.webp"
-        },
-        {
             name: "Thẩm Phán của Diêm Vương",
             desc: "Sau khi thua tất cả tướng, người chơi được chọn 3 tướng để xin Diêm Vương hồi sinh, Ngài ấy sẽ chọn 1 trong 3. Nhưng nếu vị tướng đó bại trận lần nữa, người chơi buộc phải bán.",
             img: "images/augments/23.webp"
         },
         {
             name: "Thượng tầng Khoa Học",
-            desc: "+1 ô tướng, và + thêm 1 trong 3 vòng tiếp theo",
+            desc: "+1 ô tướng, và + thêm 1 trong 2 vòng tiếp theo",
             img: "images/augments/24.jpg"
         },
         {
@@ -159,12 +154,12 @@ const augments = {
         },
         {
             name: "Sự hi sinh của Goku",
-            desc: "Nhận 1 Goku Base (Mid), khi người chơi bị hạ điểm sinh mệnh về 0, loại 5 tướng Goku khác nhau, và nhận 1 máu, 30 vàng, và 1 ô tướng, và 1 tướng S ngẫu nhiên.",
+            desc: "Nhận 1 Goku Base (Mid), khi người chơi bị hạ điểm sinh mệnh về 0, loại 5 tướng Goku khác nhau, và nhận 1 máu, 30 vàng, 1 ô tướng, và 1 tướng S ngẫu nhiên.",
             img: "images/augments/27.jpg"
         },
         {
             name: "Lưỡng Long Nhất Thể",
-            desc: "Tất cả tướng Dung Hợp tốn 2 ô, và nếu người chơi dứt điểm tướng cuối cùng của đối phương bằng tướng dung hợp, gây gấp đôi sát thương. Nhận 1 Gotenks bây giờ và 1 Gogeta ở vòng 6",
+            desc: "Tất cả tướng Dung Hợp tốn 2 ô, và nếu người chơi dứt điểm tướng cuối cùng của đối phương bằng tướng dung hợp, gây gấp đôi sát thương. Nhận 1 Gotenks bây giờ và 1 Gogeta ở vòng 5",
             img: "images/augments/28.webp"
         },
         {
@@ -179,7 +174,7 @@ const augments = {
         },
         {
             name: "Vé khuyến mãi toàn cầu",
-            desc: "Phí đổi lại = 1 vàng.<br>Phí mua tỉ lệ tướng = 4/4/3 vàng.<br>Phí mua ô tướng = 20/20/18 vàng.<br>Phí mua ô hàng chờ = 15 vàng.",
+            desc: "Phí đổi lại = 1 vàng.<br>Phí mua tỉ lệ tướng = 5/4/3 vàng.<br>Phí mua ô tướng = 20/20/18 vàng.<br>Phí mua ô hàng chờ = 15 vàng.",
             img: "images/augments/31.png"
         },
         {
@@ -204,15 +199,20 @@ const augments = {
         },
         {
             name: "Thiên tài bác học Hedo",
-            desc: "",
+            desc: "Nhận Gamma 1 & 2, người chơi bị -3 ô tướng cho đến khi có Cell Max. Nhận 1 Cell Max ở vòng 6.<br>Mỗi vòng thắng người chơi được +3 vàng/khoảng cách tướng.",
             img: "images/augments/58.webp"
         },
 
     ],
     Z: [
         {
+            name: "Biệt Đội Kiêu Hùng xuất hiện!!!",
+            desc: "Trả 10 vàng. Nhận 1 Jiren, Toppo, Dyspo.<br>Jiren không thể biến hình đến hết vòng 3.",
+            img: "images/augments/22.webp"
+        },
+        {
             name: "Sự bộc phát của Gohan!!",
-            desc: "Nhận 1 Gohan (Siêu Anh Hùng), với mỗi vòng đấu thua, Gohan sẽ tiến hóa 1 bậc. Nếu đến vòng 6, khi đội bạn thua với Piccolo trong đội hình. Gohan sẽ lên dạng Thú. Nhận 20 vàng khi hóa Thú.",
+            desc: "Nhận 1 Gohan (Siêu Anh Hùng), với mỗi vòng đấu thua, Gohan sẽ tiến hóa 1 bậc. Nếu đến vòng 6, khi đội bạn thua với Piccolo trong đội hình. Gohan sẽ hóa Thú. Nhận 25 vàng và 1 ô tướng khi sở hữu Gohan Thú.",
             img: "images/augments/36.webp"
         },
         {
@@ -252,7 +252,7 @@ const augments = {
         },
         {
             name: "Thần Rồng Khói Đen",
-            desc: "Lượng vàng hiện tại và lượng vàng kiếm được sẽ chuyển thành điểm sinh mệnh. Người chơi có thể sử dụng điểm sinh mệnh để mua bất cứ điều gì. +3/7/10 điểm sinh mệnh mỗi vòng đấu.",
+            desc: "Lượng vàng hiện tại và lượng vàng kiếm được sẽ chuyển thành điểm sinh mệnh. Người chơi có thể sử dụng điểm sinh mệnh để mua bất cứ điều gì. +3/5/8 điểm sinh mệnh mỗi vòng đấu.",
             img: "images/augments/44.webp"
         },
         {
@@ -307,12 +307,12 @@ const augments = {
         },
         {
             name: "Ta muốn xem nữa!",
-            desc: "Nhận 3 ô tướng, nhưng nếu thua, -80 điểm sinh mệnh. Nhận 0/1/2 tướng Z và 20 vàng.",
+            desc: "Nhận 3 ô tướng, nhưng nếu thua, -80 điểm sinh mệnh. Nhận 1 tướng A/S/Z và 20 vàng.",
             img: "images/augments/55.jpg"
         },
         {
             name: "Siêu Thần Saiyan",
-            desc: "",
+            desc: "Nhận 1 Siêu Thần Saiyan Goku. Hồi 5 điểm sinh mệnh với mỗi mạng hạ gục và 50XP khi dành chiến thắng vòng đấu với SSG Goku. Lập tức hạ gục 1 tướng của kẻ địch lần đầu SSG Goku chạm trán mỗi 2 vòng.<br> Nhận 1 Siêu Thần Saiyan Vegeta ở round 4.",
             img: "images/augments/56.webp"
         },
         {
@@ -325,7 +325,7 @@ const augments = {
 };
 
 let rollCount = 0;
-const maxRolls = 3;
+const maxRolls = 2;
 
 function getRandomAugments(tier) {
     const pool = augments[tier];
