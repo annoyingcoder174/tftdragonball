@@ -3,16 +3,27 @@ let currentUserRef = null;
 let boughtChamps = [];
 
 const tierChances = {
-    1: { D: 85, C: 15 },
-    2: { D: 60, C: 25, B: 15 },
-    3: { D: 40, C: 35, B: 24, A: 1 },
-    4: { D: 25, C: 35, B: 30, A: 10 },
-    5: { D: 15, C: 29, B: 30, A: 20, S: 10, Z: 1 },
-    6: { D: 12, C: 20, B: 20, A: 30, S: 12, Z: 6 },
-    7: { D: 8.5, C: 15, B: 20, A: 25, S: 20, Z: 11, GOD: 0.5 },
-    8: { D: 5, C: 9, B: 18, A: 25, S: 22, Z: 18, GOD: 3 },
-    9: { D: 3.5, C: 9, B: 15, A: 23, S: 25, Z: 20, GOD: 4.5 }
+    1: { D: 84, C: 15, dragonBall: 1 },
+    2: { D: 59, C: 25, B: 15, dragonBall: 1 },
+    3: { D: 40, C: 35, B: 22, A: 1, dragonBall: 2 },
+    4: { D: 25, C: 32, B: 30, A: 10, dragonBall: 3 },
+    5: { D: 15, C: 29, B: 25, A: 20, S: 10, Z: 1, dragonBall: 5 },
+    6: { D: 12, C: 15, B: 20, A: 30, S: 12, Z: 6, dragonBall: 5 },
+    7: { D: 7.5, C: 15, B: 15, A: 25, S: 20, Z: 11, GOD: 0.5, dragonBall: 6 },
+    8: { D: 5, C: 9, B: 15, A: 20.5, S: 22, Z: 18, GOD: 3, dragonBall: 7.5 },
+    9: { D: 3.5, C: 7, B: 10, A: 20, S: 25, Z: 20, GOD: 4.5, dragonBall: 10 }
 };
+const dragonBallPool = [
+    { name: "Ngọc Rồng 1 Sao", cost: 0, img: "images/dragonballs/1.png", tier: "dragonBall" },
+    { name: "Ngọc Rồng 2 Sao", cost: 0, img: "images/dragonballs/2.png", tier: "dragonBall" },
+    { name: "Ngọc Rồng 3 Sao", cost: 0, img: "images/dragonballs/3.png", tier: "dragonBall" },
+    { name: "Ngọc Rồng 4 Sao", cost: 0, img: "images/dragonballs/4.png", tier: "dragonBall" },
+    { name: "Ngọc Rồng 5 Sao", cost: 0, img: "images/dragonballs/5.jpg", tier: "dragonBall" },
+    { name: "Ngọc Rồng 6 Sao", cost: 0, img: "images/dragonballs/6.png", tier: "dragonBall" },
+    { name: "Ngọc Rồng 7 Sao", cost: 0, img: "images/dragonballs/7.png", tier: "dragonBall" }
+];
+
+
 function getSellRefund(cost) {
     switch (cost) {
         case 1: return 1;
@@ -265,17 +276,19 @@ const champions = {
 };
 
 
-
 function getRandomTier(level) {
     const pool = tierChances[level];
     const rand = Math.random() * 100;
     let sum = 0;
+
     for (let tier in pool) {
         sum += pool[tier];
         if (rand <= sum) return tier;
     }
-    return "D";
+
+    return "D"; // Fallback
 }
+
 function handleLevelInput() {
     const level = parseInt(document.getElementById("player-level").value);
     if (!level || level < 1 || level > 9) return;
@@ -288,9 +301,27 @@ function handleLevelInput() {
     // Auto-roll 5 champions immediately on input
     const rolled = Array.from({ length: 5 }, () => {
         const tier = getRandomTier(level);
+
+        if (tier === "dragonBall") {
+            const dbIndex = Math.floor(Math.random() * 7) + 1;
+            return {
+                name: `Ngọc Rồng ${dbIndex} Sao`,
+                tier: "dragonBall",
+                cost: 0,
+                img: `images/dragonballs/${dbIndex}.png`
+            };
+        }
+
         const pool = champions[tier];
+        if (!pool || pool.length === 0) {
+            console.warn(`No champions found for tier: ${tier}`);
+            return null;
+        }
+
         return { ...pool[Math.floor(Math.random() * pool.length)] };
-    });
+    }).filter(c => c); // Remove nulls
+
+
 
     displayChampions(rolled);
 }
@@ -299,26 +330,28 @@ function handleLevelInput() {
 function showTierPercentages(level) {
     const tierDisplay = document.getElementById("tier-percentages");
     const tierData = {
-        1: [{ tier: "D", rate: 85 }, { tier: "C", rate: 15 }],
-        2: [{ tier: "D", rate: 60 }, { tier: "C", rate: 25 }, { tier: "B", rate: 15 }],
-        3: [{ tier: "D", rate: 40 }, { tier: "C", rate: 35 }, { tier: "B", rate: 24 }, { tier: "A", rate: 1 }],
-        4: [{ tier: "D", rate: 25 }, { tier: "C", rate: 35 }, { tier: "B", rate: 30 }, { tier: "A", rate: 10 }],
-        5: [{ tier: "D", rate: 15 }, { tier: "C", rate: 29 }, { tier: "B", rate: 30 }, { tier: "A", rate: 20 }, { tier: "S", rate: 10 }, { tier: "Z", rate: 1 }],
-        6: [{ tier: "D", rate: 12 }, { tier: "C", rate: 20 }, { tier: "B", rate: 20 }, { tier: "A", rate: 30 }, { tier: "S", rate: 12 }, { tier: "Z", rate: 6 }],
-        7: [{ tier: "D", rate: 8.5 }, { tier: "C", rate: 15 }, { tier: "B", rate: 20 }, { tier: "A", rate: 25 }, { tier: "S", rate: 20 }, { tier: "Z", rate: 11 }, { tier: "GOD", rate: 0.5 }],
-        8: [{ tier: "D", rate: 5 }, { tier: "C", rate: 9 }, { tier: "B", rate: 18 }, { tier: "A", rate: 25 }, { tier: "S", rate: 22 }, { tier: "Z", rate: 18 }, { tier: "GOD", rate: 3 }],
-        9: [{ tier: "D", rate: 3.5 }, { tier: "C", rate: 9 }, { tier: "B", rate: 15 }, { tier: "A", rate: 23 }, { tier: "S", rate: 25 }, { tier: "Z", rate: 20 }, { tier: "GOD", rate: 4.5 }]
+        1: [{ tier: "D", rate: 84 }, { tier: "C", rate: 15 }, { tier: "dragonBall", rate: 1 }],
+        2: [{ tier: "D", rate: 59 }, { tier: "C", rate: 25 }, { tier: "B", rate: 15 }, { tier: "dragonBall", rate: 1 }],
+        3: [{ tier: "D", rate: 40 }, { tier: "C", rate: 35 }, { tier: "B", rate: 22 }, { tier: "A", rate: 1 }, { tier: "dragonBall", rate: 2 }],
+        4: [{ tier: "D", rate: 25 }, { tier: "C", rate: 32 }, { tier: "B", rate: 30 }, { tier: "A", rate: 10 }, { tier: "dragonBall", rate: 3 }],
+        5: [{ tier: "D", rate: 15 }, { tier: "C", rate: 29 }, { tier: "B", rate: 25 }, { tier: "A", rate: 20 }, { tier: "S", rate: 10 }, { tier: "Z", rate: 1 }, { tier: "dragonBall", rate: 5 }],
+        6: [{ tier: "D", rate: 12 }, { tier: "C", rate: 15 }, { tier: "B", rate: 20 }, { tier: "A", rate: 30 }, { tier: "S", rate: 12 }, { tier: "Z", rate: 6 }, { tier: "dragonBall", rate: 5 }],
+        7: [{ tier: "D", rate: 7.5 }, { tier: "C", rate: 15 }, { tier: "B", rate: 15 }, { tier: "A", rate: 25 }, { tier: "S", rate: 20 }, { tier: "Z", rate: 11 }, { tier: "GOD", rate: 0.5 }, { tier: "dragonBall", rate: 6 }],
+        8: [{ tier: "D", rate: 5 }, { tier: "C", rate: 9 }, { tier: "B", rate: 15 }, { tier: "A", rate: 20.5 }, { tier: "S", rate: 22 }, { tier: "Z", rate: 18 }, { tier: "GOD", rate: 3 }, { tier: "dragonBall", rate: 7.5 }],
+        9: [{ tier: "D", rate: 3.5 }, { tier: "C", rate: 7 }, { tier: "B", rate: 10 }, { tier: "A", rate: 20 }, { tier: "S", rate: 25 }, { tier: "Z", rate: 20 }, { tier: "GOD", rate: 4.5 }, { tier: "dragonBall", rate: 10 }]
     };
-
     const rates = tierData[level];
+
     if (!rates) {
         tierDisplay.innerHTML = "";
         return;
     }
 
-    tierDisplay.innerHTML = rates.map(r =>
-        `<span class="chess-${r.tier.toLowerCase()}"><b>${r.tier}:</b> ${r.rate}%</span>`
-    ).join(" | ");
+    tierDisplay.innerHTML = rates.map(r => {
+        const tierClass = `chess-${r.tier.toLowerCase()}`;
+        const tierLabel = r.tier === "dragonBall" ? "Ngọc Rồng" : r.tier;
+        return `<span class="${tierClass}"><b>${tierLabel}:</b> ${r.rate}%</span>`;
+    }).join(" | ");
 }
 
 
@@ -360,9 +393,26 @@ function rollChampions() {
         // Generate champions
         const rolled = Array.from({ length: 5 }, () => {
             const tier = getRandomTier(level);
+
+            if (tier === "dragonBall") {
+                const dbIndex = Math.floor(Math.random() * 7) + 1;
+                return {
+                    name: `Ngọc Rồng ${dbIndex} Sao`,
+                    tier: "dragonBall",
+                    cost: 0,
+                    img: `images/dragonballs/${dbIndex}.png`
+                };
+            }
+
             const pool = champions[tier];
+            if (!pool || pool.length === 0) {
+                console.warn(`No champions found for tier: ${tier}`);
+                return null;
+            }
+
             return { ...pool[Math.floor(Math.random() * pool.length)] };
-        });
+        }).filter(c => c); // Remove nulls
+
 
         displayChampions(rolled);
     });
@@ -382,6 +432,9 @@ function displayChampions(rolled) {
 
         if (champ.tier === "Z") {
             card.classList.add("card-tier-z");
+        }
+        else if (champ.tier === "dragonBall") {
+            card.classList.add("card-tier-dragonball");
         }
         else if (champ.tier === "GOD") {
             card.classList.add("card-tier-god");
