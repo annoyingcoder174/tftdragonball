@@ -561,18 +561,12 @@ function finishRolling() {
     currentUserRef.get().then(doc => {
         if (!doc.exists) return;
 
-        const prevChamps = doc.data().champs || [];
-        const newChamps = [...prevChamps, ...boughtChamps];
-
-        currentUserRef.update({
-            champs: newChamps
-        }).then(() => {
-            boughtChamps = [];
-            currentRollLevels.clear();
-            window.location.href = "main.html";
-        });
+        // 🧠 Don't re-save champs! They were already added during buyChampion()
+        currentRollLevels.clear();
+        window.location.href = "main.html";
     });
 }
+
 
 function exitToMain() {
     location.href = "main.html";
