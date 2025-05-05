@@ -377,15 +377,41 @@ async function loadTable() {
         const nextTiers = data.nextTiers ? data.nextTiers.join(", ") : "Không có";
         const gold = data.gold ?? 0;
         const levels = (data.rollLevels || []).join(" / ");
-        const levelText = levels ? `<small><b>Level(s):</b> ${levels}</small><br>` : "";
+        // const levelText = levels ? `<small><b>Level(s):</b> ${levels}</small><br>` : "";
 
         const champRolls = data.champRollCount || 0;
         const augmentRolls = data.augmentRollCount || 0;
+        const currentExp = data.omniExp || 0;
+        const levelTable = [
+            { lvl: 9, exp: 2000 },
+            { lvl: 8, exp: 1600 },
+            { lvl: 7, exp: 1200 },
+            { lvl: 6, exp: 900 },
+            { lvl: 5, exp: 700 },
+            { lvl: 4, exp: 500 },
+            { lvl: 3, exp: 350 },
+            { lvl: 2, exp: 200 },
+            { lvl: 1, exp: 100 }
+        ];
+        const currentLevel = levelTable.find(l => currentExp >= l.exp)?.lvl || 1;
+        const levelText = `
+    <small><b>Level hiện tại:</b> ${data.level ?? "?"}</small><br>
+    <small><b>EXP hiện tại:</b> ${data.exp ?? "?"}</small><br>
+    <small><b>HP hiện tại:</b> ${data.hp ?? "?"}</small><br>
+    ${levels ? `<small><b>Level(s):</b> ${levels}</small><br>` : ""}
+`;
+
+        const hpText = `<small><b></b></small><br>`;
+
+
+
 
         tr.innerHTML = `
             <td>
-                <b>${data.name}</b><br>
-                ${levelText}
+            <b>${data.name}</b><br>
+            ${levelText}${hpText}
+            
+
                 <label>Vàng:</label>
                 <input type="number" value="${gold}" min="0"
                     onchange="updateGold('${doc.id}', this.value)" style="width: 60px;"><br>
@@ -471,4 +497,89 @@ function hideDesc(id) {
     const box = document.getElementById(id);
     if (box) box.style.display = "none";
 }
+
+document.getElementById("omniToggleBtn").onclick = () => {
+    const modal = document.getElementById("omniModal");
+    modal.style.display = modal.style.display === "none" ? "block" : "none";
+};
+
+function calculateOmni() {
+    const r = parseInt(document.getElementById("omniRound").value);
+    const g = parseInt(document.getElementById("omniGold").value);
+    const exp = parseInt(document.getElementById("omniExp").value);
+    const hp = parseInt(document.getElementById("omniHP").value);
+    const win = parseInt(document.getElementById("omniWin").value);
+    const lose = parseInt(document.getElementById("omniLose").value);
+    const gap = parseInt(document.getElementById("omniGap").value);
+
+    if (isNaN(r) || r < 1) return alert("Vui lòng nhập round >= 1");
+
+    // Base values based on round
+    const goldBase = [0, 5, 8, 12, 15, 22, 28][r - 1] || 35;
+    const expBase = [100, 100, 100, 100, 150, 100, 150][r - 1] || 250;
+
+    // Streak bonuses
+    const winBonus = win >= 7 ? 25 : [0, 0, 2, 5, 10, 15, 20][win] || 0;
+    const loseBonus = lose >= 7 ? 20 : [0, 0, 2, 5, 8, 12, 17][lose] || 0;
+
+    // Interest from gold
+    const interest = Math.floor(g / 10);
+
+    // Damage calculation (from previous round)
+    const dmgIndex = Math.max(0, r - 2);
+    const baseDMG = [5, 8, 10, 12, 15, 18, 20][dmgIndex] || 20;
+    const perGap = [1, 2, 3, 4, 5, 6, 8][dmgIndex] || 10;
+    const totalDMG = baseDMG + perGap * (gap || 0);
+
+    // Final stats
+    const totalGold = g + goldBase + winBonus + loseBonus + interest;
+    const totalExp = exp + expBase;
+    const finalHP = hp - (gap > 0 ? totalDMG : 0);
+
+    // Level mapping from exp
+    const levelTable = [
+        { lvl: 9, exp: 2000 }, { lvl: 8, exp: 1600 }, { lvl: 7, exp: 1200 },
+        { lvl: 6, exp: 900 }, { lvl: 5, exp: 700 }, { lvl: 4, exp: 500 },
+        { lvl: 3, exp: 350 }, { lvl: 2, exp: 200 }, { lvl: 1, exp: 100 }
+    ];
+    const newLevel = levelTable.find(l => totalExp >= l.exp)?.lvl || 1;
+
+    // Display result
+    document.getElementById("omniResult").innerHTML = `
+      <b>💰 Tính Vàng:</b><br>
+      +${goldBase} vàng cơ bản<br>
+      +${winBonus} vàng chuỗi thắng<br>
+      +${loseBonus} vàng chuỗi thua<br>
+      +${interest} vàng lợi tức<br>
+      👉 <b>Tổng vàng: ${totalGold}</b><br><br>
+
+      <b>📚 Tính Kinh Nghiệm:</b><br>
+      +${expBase} EXP<br>
+      👉 <b>Tổng Kinh Nghiệm: ${totalExp}</b><br>
+      👉 <b>Level mới: ${newLevel}</b><br><br>
+
+      <b>❤️ Máu:</b><br>
+      ${gap > 0 ? `-<b>${totalDMG}</b> máu<br>👉 Máu còn: <b>${finalHP}</b>` : `✅ Không mất máu`}
+    `;
+
+    // Save to Firestore
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    const playerRef = firebase.firestore()
+        .collection("tables").doc("sharedTable")
+        .collection("players").doc(user.uid);
+
+    playerRef.update({
+        gold: totalGold,
+        exp: totalExp,
+        level: newLevel,
+        hp: finalHP
+    }).then(() => {
+        console.log("🎯 Omni stats updated in Firestore.");
+        loadTable(); // Reflect updates on table immediately
+    });
+}
+
+
 

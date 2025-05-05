@@ -34,6 +34,26 @@
 
 
         <h2>Bảng đấu hiện tại</h2>
+        <!-- Omni Calculator Button -->
+        <button id="omniToggleBtn" style="position: fixed; bottom: 90px; right: 20px; z-index: 9999;">
+            📊 Omni Calculator
+        </button>
+
+        <!-- Omni Calculator Modal -->
+        <div id="omniModal"
+            style="display: none; position: fixed; bottom: 150px; right: 20px; background: #111; color: #fff; padding: 20px; border: 2px solid #00ffcc; border-radius: 10px; z-index: 9999; width: 300px; font-family: sans-serif;">
+            <h3>Omni Calculator</h3>
+            <label>Round: <input type="number" id="omniRound" min="1" /></label><br>
+            <label>Gold: <input type="number" id="omniGold" /></label><br>
+            <label>Exp: <input type="number" id="omniExp" /></label><br>
+            <label>Health: <input type="number" id="omniHP" /></label><br>
+            <label>Win Streak: <input type="number" id="omniWin" min="0" /></label><br>
+            <label>Lose Streak: <input type="number" id="omniLose" min="0" /></label><br>
+            <label>Chess Gaps (if lost): <input type="number" id="omniGap" min="0" /></label><br><br>
+            <button onclick="calculateOmni()">🧠 Tính</button>
+            <div id="omniResult" style="margin-top: 10px; font-size: 14px;"></div>
+        </div>
+
 
         <table id="augment-table">
             <h3>Môi trường</h3>
@@ -52,6 +72,7 @@
         <h2>Bảng đã tham gia</h2>
         <div id="previous-tables">Đang tải...</div>
     </div>
+
 
     <script>
         function handleRollAugment() {
