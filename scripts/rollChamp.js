@@ -60,6 +60,24 @@ firebase.auth().onAuthStateChanged(user => {
         });
     }
 });
+let champRolled = false;
+
+firebase.auth().onAuthStateChanged(async user => {
+    if (user) {
+        const playerRef = db.collection("tables").doc("sharedTable").collection("players").doc(user.uid);
+        const doc = await playerRef.get();
+        if (doc.exists && doc.data().champRolled) {
+            champRolled = true;
+            const btn = document.getElementById("roll-btn");
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "Đã roll!";
+            }
+        }
+    } else {
+        firebase.auth().signInAnonymously();
+    }
+});
 
 
 
@@ -683,3 +701,32 @@ firebase.auth().onAuthStateChanged(user => {
         });
     }
 });
+const timerDisplay = document.getElementById("countdown-timer");
+const timerDuration = 60; // seconds
+let countdown;
+
+function startCountdown() {
+    const startTime = parseInt(localStorage.getItem("champRollStart")) || Date.now();
+    localStorage.setItem("champRollStart", startTime);
+
+    countdown = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const timeLeft = timerDuration - elapsed;
+        timerDisplay.textContent = `⏳ Thời gian còn lại: ${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+            clearInterval(countdown);
+            alert("⏰ Hết thời gian! Trở về bảng chính.");
+            localStorage.removeItem("champRollStart");
+            window.location.href = "main.html";
+        }
+    }, 1000);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (!localStorage.getItem("champRollStart")) {
+        localStorage.setItem("champRollStart", Date.now());
+    }
+    startCountdown();
+});
+

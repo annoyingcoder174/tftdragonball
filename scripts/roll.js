@@ -568,7 +568,12 @@ const environments = [
         title: "Vô Diện Giới",
         desc: "Không có gì xảy ra",
         img: "/images/environments/8.png"
-    }
+    },
+    {
+        title: "Hành Tinh Sadala",
+        desc: "-1 ô tướng trong 2 vòng đấu để nhận 1 lõi A.<br>-2 ô tướng trong 3 vòng để nhận 1 lõi S.<br>-3 ô tướng trong 4 vòng đấu để nhận 1 lõi Z.",
+        img: "/images/environments/10.png"
+    },
 ];
 
 // Optional: Split augments by core tier if you have this data

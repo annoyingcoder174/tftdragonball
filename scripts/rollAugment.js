@@ -15,6 +15,25 @@ firebase.auth().onAuthStateChanged(user => {
             });
     }
 });
+let augmentRolled = false;
+
+firebase.auth().onAuthStateChanged(async user => {
+    if (user) {
+        const playerRef = db.collection("tables").doc("sharedTable").collection("players").doc(user.uid);
+        const doc = await playerRef.get();
+        if (doc.exists && doc.data().augmentRolled) {
+            augmentRolled = true;
+            const btn = document.getElementById("roll-btn");
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "Đã roll!";
+            }
+        }
+    } else {
+        firebase.auth().signInAnonymously();
+    }
+});
+
 
 
 const augments = {
@@ -326,6 +345,31 @@ const augments = {
 
 let rollCount = 0;
 const maxRolls = 2;
+let currentUser;
+let playerRef;
+
+firebase.auth().onAuthStateChanged(async user => {
+    if (user) {
+        currentUser = user;
+        playerRef = firebase.firestore()
+            .collection("tables").doc("sharedTable")
+            .collection("players").doc(user.uid);
+
+        const doc = await playerRef.get();
+        if (doc.exists) {
+            rollCount = doc.data().augmentRollCount ?? 0;
+            updateRollCountDisplay();
+        }
+    } else {
+        firebase.auth().signInAnonymously();
+    }
+});
+
+
+function updateRollCountDisplay() {
+    const left = Math.max(0, maxRolls - rollCount);
+    document.getElementById("roll-count").textContent = `Số lần rút còn lại: ${left}`;
+}
 
 function getRandomAugments(tier) {
     const pool = augments[tier];
@@ -334,16 +378,11 @@ function getRandomAugments(tier) {
 }
 
 function roll() {
+    if (!currentUser || !playerRef) return alert("Bạn chưa đăng nhập!");
     const tier = document.getElementById("tier-select").value;
-    if (!tier) {
-        alert("Vui lòng chọn bậc trước khi rút!");
-        return;
-    }
 
-    if (rollCount >= maxRolls) {
-        alert("Bạn đã hết lượt rút!");
-        return;
-    }
+    if (!tier) return alert("Vui lòng chọn bậc trước khi rút!");
+    if (rollCount >= maxRolls) return alert("Bạn đã hết lượt rút!");
 
     const rolled = getRandomAugments(tier);
     const container = document.getElementById("augment-options");
@@ -376,16 +415,13 @@ function roll() {
         card.appendChild(rateEl);
         container.appendChild(card);
 
-        // Load winrate from global stats
+        // Winrate display
         firebase.firestore().collection("augmentStats").doc(aug.name).get().then(doc => {
             if (doc.exists) {
-                const data = doc.data();
-                const win = data.win || 0;
-                const total = data.total || 0;
+                const { win = 0, total = 0 } = doc.data();
                 const winRate = total > 0 ? Math.round((win / total) * 100) : 0;
 
-                let tierClass = "";
-                let tierLabel = "";
+                let tierClass = "", tierLabel = "";
                 if (winRate >= 90) [tierLabel, tierClass] = ["Z", "tier-z"];
                 else if (winRate >= 80) [tierLabel, tierClass] = ["S", "tier-s"];
                 else if (winRate >= 60) [tierLabel, tierClass] = ["A", "tier-a"];
@@ -401,27 +437,24 @@ function roll() {
             }
         });
 
-        // Save selected augment with tier
         card.onclick = () => {
-            const user = firebase.auth().currentUser;
-            if (!user) return alert("Bạn chưa đăng nhập!");
+            playerRef.get().then(doc => {
+                const augments = doc.exists ? (doc.data().augments || []) : [];
+                augments.push({ ...aug, tier });
 
-            firebase.firestore().collection("tables").doc("sharedTable")
-                .collection("players").doc(user.uid)
-                .get().then(doc => {
-                    if (!doc.exists) return;
-                    const augments = doc.data().augments || [];
-                    augments.push({ ...aug, tier }); // ← Save tier with augment
-                    return firebase.firestore().collection("tables")
-                        .doc("sharedTable").collection("players")
-                        .doc(user.uid).update({ augments });
-                })
-                .then(() => location.href = "main.html");
+                return playerRef.update({
+                    augments,
+                    augmentRollCount: firebase.firestore.FieldValue.increment(1)
+                });
+            }).then(() => {
+                location.href = "main.html";
+            });
         };
     });
 
     rollCount++;
-    document.getElementById("roll-count").textContent = `Số lần rút còn lại: ${maxRolls - rollCount}`;
+    updateRollCountDisplay();
+    playerRef.update({ augmentRollCount: rollCount });
 }
 
 function exitToMain() {
@@ -430,4 +463,34 @@ function exitToMain() {
 
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("roll-btn").onclick = roll;
+});
+
+let countdown = 60;
+let timerInterval;
+
+function startCountdown() {
+    const display = document.getElementById("timer");
+    timerInterval = setInterval(() => {
+        countdown--;
+        if (display) display.textContent = `⏱️ ${countdown}s`;
+
+        if (countdown <= 0) {
+            clearInterval(timerInterval);
+            autoSelectThirdAugment();
+        }
+    }, 1000);
+}
+
+function autoSelectThirdAugment() {
+    const cards = document.querySelectorAll(".augment-card");
+    if (cards.length >= 3) {
+        cards[2].click(); // Auto pick the 3rd augment
+    } else {
+        location.href = "main.html";
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("roll-btn").onclick = roll;
+    startCountdown();
 });

@@ -264,6 +264,41 @@ function getRandomItem() {
 }
 
 
+async function generateShop() {
+    const user = firebase.auth().currentUser;
+    if (!user) return alert("Chưa đăng nhập!");
+
+    const playerRef = firebase.firestore()
+        .collection("tables").doc("sharedTable")
+        .collection("players").doc(user.uid);
+
+    const doc = await playerRef.get();
+    if (doc.exists && doc.data().shopUsed) {
+        alert("Bạn chỉ có thể hiện tướng 1 lần! Hãy quay lại và ấn 'Đi Chợ' để làm mới.");
+        return;
+    }
+
+    // Mark as used
+    await playerRef.update({ shopUsed: true });
+
+    const round = parseInt(document.getElementById("round-select").value);
+    const composition = getRoundComposition(round);
+    const championsToShow = [];
+
+    for (const tier in composition) {
+        const count = composition[tier];
+        const pool = champions[tier] || [];
+        for (let i = 0; i < count; i++) {
+            const champ = { ...pool[Math.floor(Math.random() * pool.length)] };
+            champ.dragonBalls = getRandomDragonBalls();
+            champ.item = getRandomItem();
+            championsToShow.push(champ);
+        }
+    }
+
+    displayShopChampions(championsToShow);
+}
+
 
 
 function getRandomDragonBalls() {
@@ -320,8 +355,48 @@ function chooseChampion(champ) {
         });
     });
 }
+let shopAlreadyUsed = false;
 
-function generateShop() {
+firebase.auth().onAuthStateChanged(async user => {
+    if (user) {
+        currentUser = user;
+        const doc = await db.collection("tables").doc("sharedTable")
+            .collection("players").doc(user.uid).get();
+
+        if (doc.exists && doc.data().shopUsed) {
+            shopAlreadyUsed = true;
+            const btn = document.getElementById("generate-btn");
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "Đã hiện tướng rồi!";
+            }
+        }
+    } else {
+        firebase.auth().signInAnonymously();
+    }
+});
+
+
+async function generateShop() {
+    if (shopAlreadyUsed) {
+        alert("Bạn chỉ có thể hiện tướng 1 lần! Quay lại 'Đi Chợ' để làm mới.");
+        return;
+    }
+
+    const user = firebase.auth().currentUser;
+    if (!user) return alert("Chưa đăng nhập!");
+
+    const playerRef = db.collection("tables").doc("sharedTable").collection("players").doc(user.uid);
+    await playerRef.update({ shopUsed: true });
+    shopAlreadyUsed = true;
+
+    // Disable button visually
+    const btn = document.getElementById("generate-btn");
+    if (btn) {
+        btn.disabled = true;
+        btn.innerText = "Đã hiện tướng rồi!";
+    }
+
     const round = parseInt(document.getElementById("round-select").value);
     const composition = getRoundComposition(round);
     const championsToShow = [];
@@ -332,13 +407,14 @@ function generateShop() {
         for (let i = 0; i < count; i++) {
             const champ = { ...pool[Math.floor(Math.random() * pool.length)] };
             champ.dragonBalls = getRandomDragonBalls();
-            champ.item = items[Math.floor(Math.random() * items.length)];
+            champ.item = getRandomItem();
             championsToShow.push(champ);
         }
     }
 
     displayShopChampions(championsToShow);
 }
+
 function chooseChampion(champ) {
     const user = firebase.auth().currentUser;
     if (!user) return;

@@ -7,6 +7,20 @@ firebase.auth().onAuthStateChanged(user => {
         firebase.auth().signInAnonymously();
     }
 });
+function handleRollAugment() {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    const playerRef = firebase.firestore()
+        .collection("tables").doc("sharedTable")
+        .collection("players").doc(user.uid);
+
+    playerRef.set({ augmentRollCount: 0 }, { merge: true }).then(() => {
+        location.href = "rollAugment.html";
+    });
+}
+
+
 const environments = [
     {
         title: "Trái Đất",
@@ -52,7 +66,12 @@ const environments = [
         title: "Vô Diện Giới",
         desc: "Không có gì xảy ra",
         img: "/images/environments/8.png"
-    }
+    },
+    {
+        title: "Hành Tinh Sadala",
+        desc: "-1 ô tướng trong 2 vòng đấu để nhận 1 lõi A.<br>-2 ô tướng trong 3 vòng để nhận 1 lõi S.<br>-3 ô tướng trong 4 vòng đấu để nhận 1 lõi Z.",
+        img: "/images/environments/10.png"
+    },
 ];
 
 function incrementAugmentRollCount(uid) {
@@ -87,18 +106,24 @@ function handleRollAugment() {
     const user = firebase.auth().currentUser;
     if (!user) return;
 
-    const playerRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(user.uid);
+    const playerRef = firebase.firestore()
+        .collection("tables").doc("sharedTable")
+        .collection("players").doc(user.uid);
 
     playerRef.update({
-        augmentRollCount: firebase.firestore.FieldValue.increment(1)
+        augmentRollCount: 0
     }).then(() => {
         location.href = "rollAugment.html";
     });
 }
 
+
 function handleRollChamp() {
     const user = firebase.auth().currentUser;
     if (!user) return;
+
+    // Clear previous rollChamp timer
+    localStorage.removeItem("champRollStart");
 
     const playerRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(user.uid);
 
@@ -167,6 +192,18 @@ function joinTable() {
     });
 }
 
+function resetShopUsage() {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    const playerRef = firebase.firestore()
+        .collection("tables").doc("sharedTable")
+        .collection("players").doc(user.uid);
+
+    playerRef.update({ shopUsed: false }).then(() => {
+        location.href = "shop.html";  // Go to shop
+    });
+}
 
 
 function leaveTable() {
