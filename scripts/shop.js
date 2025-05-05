@@ -227,17 +227,20 @@ firebase.auth().onAuthStateChanged(user => {
 });
 
 const items = [
-    "./images/items/sword.png",
-    "./images/items/shield.png",
-    "./images/items/boots.png",
-    "./images/items/armor.png",
-    "./images/items/scouter.png",
-    "./images/items/potara.png",
-    "./images/items/senzu.png",
-    "./images/items/glove.png",
-    "./images/items/blaster.png",
-    "./images/items/capsule.png"
+    { img: "./images/items/1.webp", name: "Gậy Như Ý", desc: "Gây thêm 5 sát thương với mỗi khoảng cách tướng", weight: 11.57 },
+    { img: "./images/items/2.webp", name: "Hồi Phục", desc: "Hồi 5 điểm sinh mệnh với mỗi khoảng cách tướng.", weight: 11.57 },
+    { img: "./images/items/3.webp", name: "Giáp Chiến Đấu", desc: "Giảm 40% sát thương nhận vào trong vòng đấu.", weight: 11.57 },
+    { img: "./images/items/4.jpg", name: "Kẹo Majin Buu", desc: "Hồi 20 điểm sinh mệnh.", weight: 11.57 },
+    { img: "./images/items/5.webp", name: "Máy đo chỉ số", desc: "Nhận 1 tướng có cùng Bậc với Bậc mạnh nhất của đối phương.", weight: 4 },
+    { img: "./images/items/6.webp", name: "Máy dò Ngọc Rồng", desc: "Nhận 1 ngọc rồng ngẫu nhiên mà người chơi chưa sở hữu.", weight: 5 },
+    { img: "./images/items/7.webp", name: "Viên con nhộng Capsule", desc: "+2 ô hàng chờ.", weight: 11.57 },
+    { img: "./images/items/8.webp", name: "Máy phát sóng Blutz", desc: "Đổi tướng hiện tại lên tướng bậc cao hơn (trừ tướng GOD).", weight: 5 },
+    { img: "./images/items/9.webp", name: "Buồng Bay của Frieza", desc: "Tạo 1 lớp khiên bảo vệ 1 tướng.", weight: 11.57 },
+    { img: "./images/items/10.webp", name: "Súng năng lượng", desc: "Bắn 1 tướng ngẫu nhiên (trừ tướng bậc Z, God).", weight: 11.57 },
+    { img: "./images/items/11.webp", name: "Máy du hành thời gian", desc: "Nhận tỉ lệ tướng cao hơn 1 bậc trong vòng đấu.", weight: 5 },
 ];
+
+
 
 const dragonBalls = [
     "./images/dragonballs/1.png",
@@ -248,10 +251,20 @@ const dragonBalls = [
     "./images/dragonballs/6.png",
     "./images/dragonballs/7.png"
 ];
-
 function getRandomItem() {
-    return items[Math.floor(Math.random() * itemPool.length)];
+    const totalWeight = items.reduce((sum, item) => sum + item.weight, 0);
+    let rand = Math.random() * totalWeight;
+
+    for (let item of items) {
+        if (rand < item.weight) return item; // return full item object
+        rand -= item.weight;
+    }
+
+    return items[0]; // fallback
 }
+
+
+
 
 function getRandomDragonBalls() {
     const shuffled = [...dragonBalls].sort(() => 0.5 - Math.random());
@@ -395,11 +408,12 @@ function displayShopChampions(champs) {
     const container = document.getElementById("shop-results");
     container.innerHTML = "";
 
-    champs.forEach(champ => {
+    champs.forEach((champ, index) => {
         const card = document.createElement("div");
         card.className = "augment-card";
         card.classList.add(`card-tier-${champ.tier.toLowerCase()}`);
         card.style.cursor = "pointer";
+        card.style.position = "relative";
 
         const img = document.createElement("img");
         img.src = champ.img;
@@ -424,15 +438,41 @@ function displayShopChampions(champs) {
             dragonBallContainer.appendChild(dbImg);
         });
 
-        const itemInfo = document.createElement("div");
-        itemInfo.innerHTML = `<b>Vật phẩm:</b> ${champ.item}`;
+        // === ITEM TOOLTIP ===
+        const itemObj = items.find(i => i.img === champ.item.img); // match by full object now
+        const itemWrapper = document.createElement("div");
+        itemWrapper.className = "augment-hover-wrapper";
+        itemWrapper.style.display = "inline-block";
 
+        const itemImg = document.createElement("img");
+        itemImg.src = champ.item.img;
+        itemImg.alt = "Vật phẩm";
+        itemImg.className = "item-img";
+        itemImg.style.width = "40px";
+
+        const tooltip = document.createElement("div");
+        tooltip.className = "augment-desc-hover";
+        tooltip.innerHTML = `
+            <div class="tooltip-name">${itemObj?.name || "Vật phẩm"}</div>
+            <div class="tooltip-desc">${itemObj?.desc || ""}</div>
+        `;
+        tooltip.style.display = "none";
+        tooltip.style.left = "60px";
+
+        itemWrapper.onmouseenter = () => tooltip.style.display = "block";
+        itemWrapper.onmouseleave = () => tooltip.style.display = "none";
+
+        itemWrapper.appendChild(itemImg);
+        itemWrapper.appendChild(tooltip);
+
+        // === Assemble card ===
         card.appendChild(img);
         card.appendChild(name);
         card.appendChild(desc);
         card.appendChild(dragonBallContainer);
-        card.appendChild(itemInfo);
+        card.appendChild(itemWrapper);
 
+        // === Click to save ===
         card.onclick = async () => {
             if (!currentUser) return alert("Chưa đăng nhập!");
             const uid = currentUser.uid;
@@ -457,7 +497,7 @@ function displayShopChampions(champs) {
             window.location.href = "main.html";
         };
 
-
         container.appendChild(card);
     });
 }
+

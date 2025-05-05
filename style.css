@@ -176,19 +176,20 @@ td img {
 
 .augment-desc-hover {
     position: absolute;
-    top: 60px;
-    left: 0;
-    width: 240px;
-    background: rgba(0, 0, 0, 0.9);
-    color: #fff;
-    padding: 8px 10px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    z-index: 10;
-    display: none;
-    white-space: pre-line;
-    box-shadow: 0 0 10px #000;
+    top: -5px;
+    /* appear above the item */
+    left: 60px;
+    background-color: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    z-index: 9999;
+    max-width: 180px;
+    white-space: normal;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
+
 
 .augment-rate {
     margin-top: 8px;
