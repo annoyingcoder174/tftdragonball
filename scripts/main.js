@@ -220,119 +220,150 @@ function loadPreviousTables() {
         });
     });
 }
+async function fetchAugmentStats() {
+    const statsSnapshot = await firebase.firestore().collection("augmentStats").get();
+    const stats = {};
+    statsSnapshot.forEach(doc => {
+        stats[doc.id] = doc.data();
+    });
+    return stats;
+}
+async function fetchItems() {
+    const itemsSnapshot = await firebase.firestore().collection("items").get();
+    const items = {};
+    itemsSnapshot.forEach(doc => {
+        items[doc.id] = doc.data();
+    });
+    return items;
+}
 
-function loadTable() {
+
+
+async function loadTable() {
     const tbody = document.querySelector("#augment-table tbody");
     tbody.innerHTML = "";
 
     const tableRef = firebase.firestore().collection("tables").doc("sharedTable");
 
-    // Load environment first
-    tableRef.get().then(doc => {
-        if (doc.exists && doc.data().environment) {
-            const env = doc.data().environment;
-            const envHTML = `
+    // Fetch augment stats and items
+    const [augmentStats, items] = await Promise.all([
+        fetchAugmentStats(),
+        fetchItems()
+    ]);
+
+    // Load environment
+    const tableDoc = await tableRef.get();
+    if (tableDoc.exists && tableDoc.data().environment) {
+        const env = tableDoc.data().environment;
+        const envHTML = `
+            <div class="augment-hover-wrapper"
+                onmouseenter="showDesc('env-tooltip')"
+                onmouseleave="hideDesc('env-tooltip')">
+                <img src="${env.img}" alt="${env.title}" width="80" height="80">
+                <div class="augment-desc-hover" id="env-tooltip" style="left: 100px;">
+                    <div class="tooltip-name tier-title-z">${env.title}</div>
+                    <div class="tooltip-desc">${env.desc}</div>
+                </div>
+            </div>
+        `;
+        const envDisplay = document.getElementById("environment-display");
+        if (envDisplay) envDisplay.innerHTML = envHTML;
+    }
+
+    // Load players
+    const playersSnapshot = await tableRef.collection("players").get();
+    playersSnapshot.forEach(doc => {
+        const data = doc.data();
+        const tr = document.createElement("tr");
+
+        // Augments
+        const augmentsHtml = (data.augments || []).map((aug, index) => {
+            const tooltipId = `tooltip-${doc.id}-${index}`;
+            const desc = (aug.desc || "").replace(/<br>/g, '\n');
+            const stats = augmentStats[aug.name] || { win: 0, total: 0 };
+            const winRate = stats.total ? Math.round((stats.win / stats.total) * 100) : null;
+
+            let tierLabel = "D", tierClass = "tier-title-d";
+            if (winRate >= 90) [tierLabel, tierClass] = ["Z", "tier-title-z"];
+            else if (winRate >= 80) [tierLabel, tierClass] = ["S", "tier-title-s"];
+            else if (winRate >= 60) [tierLabel, tierClass] = ["A", "tier-title-a"];
+            else if (winRate >= 50) [tierLabel, tierClass] = ["B", "tier-title-b"];
+            else if (winRate >= 30) [tierLabel, tierClass] = ["C", "tier-title-c"];
+            else if (winRate != null) [tierLabel, tierClass] = ["D", "tier-title-d"];
+            else[tierLabel, tierClass] = ["?", "tier-title-unknown"];
+
+            const winRateInfo = winRate != null
+                ? `<div class="${tierClass}">Tỉ lệ thắng: ${winRate}% (${tierLabel})</div>`
+                : `<div class="tier-title-unknown">Chưa có dữ liệu</div>`;
+
+            return `
                 <div class="augment-hover-wrapper"
-                    onmouseenter="showDesc('env-tooltip')"
-                    onmouseleave="hideDesc('env-tooltip')">
-                    <img src="${env.img}" alt="${env.title}" width="80" height="80">
-                    <div class="augment-desc-hover" id="env-tooltip" style="left: 100px;">
-                        <div class="tooltip-name tier-title-z">${env.title}</div>
-                        <div class="tooltip-desc">${env.desc}</div>
+                    onmouseenter="showDesc('${tooltipId}')"
+                    onmouseleave="hideDesc('${tooltipId}')">
+                    <img src="${aug.img}" alt="${aug.name}" width="60" height="60">
+                    <div class="augment-desc-hover" id="${tooltipId}">
+                        <div class="tooltip-name ${tierClass}">${aug.name}</div>
+                        <div class="tooltip-desc">${desc}</div>
+                        ${winRateInfo}
                     </div>
                 </div>
             `;
-            const envDisplay = document.getElementById("environment-display");
-            if (envDisplay) envDisplay.innerHTML = envHTML;
-        }
+        }).join(" ");
 
-        // Then load players
-        tableRef.collection("players").get().then(snapshot => {
-            snapshot.forEach(async doc => {
-                const data = doc.data();
-                const tr = document.createElement("tr");
+        // Champions
+        const champs = data.champs || [];
+        const champImgs = champs.map(c => `<img src="${c.img}" class="champ-img chess-${c.tier?.toLowerCase() || 'd'}" title="${c.name}">`).join(" ");
 
-                const augmentsHtml = await Promise.all((data.augments || []).map(async (aug, index) => {
-                    const tooltipId = `tooltip-${doc.id}-${index}`;
-                    const desc = (aug.desc || "").replace(/<br>/g, '\n');
+        // Items
+        const itemImgs = champs.map((c, i) => {
+            if (!c.item) return "";
+            const tooltipId = `item-tooltip-${doc.id}-${i}`;
+            return `
+                <div class="augment-hover-wrapper"
+                    onmouseenter="showDesc('${tooltipId}')"
+                    onmouseleave="hideDesc('${tooltipId}')">
+                    <img src="${c.item.img}" class="item-img" title="${c.item.name}">
+                    <div class="augment-desc-hover" id="${tooltipId}">
+                        <div class="tooltip-name">${c.item.name}</div>
+                        <div class="tooltip-desc">${c.item.desc}</div>
+                    </div>
+                </div>
+            `;
+        }).join(" ");
 
-                    // Fetch augment stats from Firestore
-                    let winRateInfo = `<div class="tier-title-unknown">Chưa có dữ liệu</div>`;
-                    let tierLabel = "?";
-                    let tierClass = "tier-title-unknown";
 
-                    try {
-                        const statsDoc = await firebase.firestore().collection("augmentStats").doc(aug.name).get();
-                        if (statsDoc.exists) {
-                            const statsData = statsDoc.data();
-                            const win = statsData.win || 0;
-                            const total = statsData.total || 0;
-                            const winRate = total > 0 ? Math.round((win / total) * 100) : null;
 
-                            if (winRate !== null) {
-                                if (winRate >= 90) [tierLabel, tierClass] = ["Z", "tier-title-z"];
-                                else if (winRate >= 80) [tierLabel, tierClass] = ["S", "tier-title-s"];
-                                else if (winRate >= 60) [tierLabel, tierClass] = ["A", "tier-title-a"];
-                                else if (winRate >= 50) [tierLabel, tierClass] = ["B", "tier-title-b"];
-                                else if (winRate >= 30) [tierLabel, tierClass] = ["C", "tier-title-c"];
-                                else[tierLabel, tierClass] = ["D", "tier-title-d"];
+        // Dragon Balls
+        const dragonImgs = champs.flatMap(c => (c.dragonBalls || []).map(db => `<img src="${db}" class="db-img" title="Ngọc rồng">`)).join("");
 
-                                winRateInfo = `<div class="${tierClass}">Tỉ lệ thắng: ${winRate}% (${tierLabel})</div>`;
-                            }
-                        }
-                    } catch (error) {
-                        console.error(`Error fetching stats for augment ${aug.name}:`, error);
-                    }
+        const winButton = `<button onclick="recordWin('${doc.id}', '${data.name}')">${data.name} Thắng</button>`;
+        const nextTiers = data.nextTiers ? data.nextTiers.join(", ") : "Không có";
+        const gold = data.gold ?? 0;
+        const levels = (data.rollLevels || []).join(" / ");
+        const levelText = levels ? `<small><b>Level(s):</b> ${levels}</small><br>` : "";
 
-                    return `
-                        <div class="augment-hover-wrapper"
-                            onmouseenter="showDesc('${tooltipId}')"
-                            onmouseleave="hideDesc('${tooltipId}')">
-                            <img src="${aug.img}" alt="${aug.name}" width="60" height="60">
-                            <div class="augment-desc-hover" id="${tooltipId}">
-                                <div class="tooltip-name ${tierClass}">${aug.name}</div>
-                                <div class="tooltip-desc">${desc}</div>
-                                ${winRateInfo}
-                            </div>
-                        </div>
-                    `;
-                }));
+        const champRolls = data.champRollCount || 0;
+        const augmentRolls = data.augmentRollCount || 0;
 
-                const champs = data.champs || [];
-                const champImgs = champs.map(c => `<img src="${c.img}" class="champ-img chess-${c.tier?.toLowerCase() || 'd'}" title="${c.name}">`).join(" ");
-                const itemImgs = champs.map(c => c.item ? `<img src="${c.item}" class="item-img" title="Trang bị">` : "").join(" ");
-                const dragonImgs = champs.flatMap(c => (c.dragonBalls || []).map(db => `<img src="${db}" class="db-img" title="Ngọc rồng">`)).join(" ");
+        tr.innerHTML = `
+            <td>
+                <b>${data.name}</b><br>
+                ${levelText}
+                <label>Vàng:</label>
+                <input type="number" value="${gold}" min="0"
+                    onchange="updateGold('${doc.id}', this.value)" style="width: 60px;"><br>
+                <small><b>6 lõi sắp tới:</b> ${nextTiers}</small><br>
+                <small>Đổi Tướng: ${champRolls} lần</small><br>
+                <small>Đổi Lõi Sức Mạnh: ${augmentRolls} lần</small><br><br>
+                ${winButton}
+            </td>
+            <td>${augmentsHtml}</td>
+            <td>${champImgs}</td>
+            <td>${itemImgs}</td>
+            <td>${dragonImgs}</td>
+        `;
 
-                const winButton = `<button onclick="recordWin('${doc.id}', '${data.name}')">${data.name} Thắng</button>`;
-                const nextTiers = data.nextTiers ? data.nextTiers.join(", ") : "Không có";
-                const gold = data.gold ?? 0;
-                const levels = (data.rollLevels || []).join(" / ");
-                const levelText = levels ? `<small><b>Level(s):</b> ${levels}</small><br>` : "";
-
-                const champRolls = data.champRollCount || 0;
-                const augmentRolls = data.augmentRollCount || 0;
-
-                tr.innerHTML = `
-                    <td>
-                        <b>${data.name}</b><br>
-                        ${levelText}
-                        <label>Vàng:</label>
-                        <input type="number" value="${gold}" min="0"
-                            onchange="updateGold('${doc.id}', this.value)" style="width: 60px;"><br>
-                        <small><b>6 lõi sắp tới:</b> ${nextTiers}</small><br>
-                        <small>Đổi Tướng: ${champRolls} lần</small><br>
-                        <small>Đổi Lõi Sức Mạnh: ${augmentRolls} lần</small><br><br>
-                        ${winButton}
-                    </td>
-                    <td>${augmentsHtml.join(" ")}</td>
-                    <td>${champImgs}</td>
-                    <td>${itemImgs}</td>
-                    <td>${dragonImgs}</td>
-                `;
-
-                tbody.appendChild(tr);
-            });
-        });
+        tbody.appendChild(tr);
     });
 }
 

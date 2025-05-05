@@ -228,7 +228,7 @@ firebase.auth().onAuthStateChanged(user => {
 
 const items = [
     { img: "./images/items/1.webp", name: "Gậy Như Ý", desc: "Gây thêm 5 sát thương với mỗi khoảng cách tướng", weight: 11.57 },
-    { img: "./images/items/2.webp", name: "Hồi Phục", desc: "Hồi 5 điểm sinh mệnh với mỗi khoảng cách tướng.", weight: 11.57 },
+    { img: "./images/items/2.webp", name: "Thanh Kiếm Dũng Sĩ", desc: "Hồi 5 điểm sinh mệnh với mỗi khoảng cách tướng.", weight: 11.57 },
     { img: "./images/items/3.webp", name: "Giáp Chiến Đấu", desc: "Giảm 40% sát thương nhận vào trong vòng đấu.", weight: 11.57 },
     { img: "./images/items/4.jpg", name: "Kẹo Majin Buu", desc: "Hồi 20 điểm sinh mệnh.", weight: 11.57 },
     { img: "./images/items/5.webp", name: "Máy đo chỉ số", desc: "Nhận 1 tướng có cùng Bậc với Bậc mạnh nhất của đối phương.", weight: 4 },
@@ -473,22 +473,33 @@ function displayShopChampions(champs) {
         card.appendChild(itemWrapper);
 
         // === Click to save ===
+        // Select a champion from the shop and save to Firebase with full item and DB info
         card.onclick = async () => {
             if (!currentUser) return alert("Chưa đăng nhập!");
             const uid = currentUser.uid;
             const tableRef = db.collection("tables").doc("sharedTable");
             const playerRef = tableRef.collection("players").doc(uid);
 
+            // Ensure the item contains full info
+            const selectedItem = champ.item || getRandomItem();
+            const selectedDragonBalls = champ.dragonBalls || getRandomDragonBalls();
+
             const selectedChamp = {
                 name: champ.name,
                 img: champ.img,
                 tier: champ.tier,
-                item: champ.item,
-                dragonBalls: champ.dragonBalls
+                cost: champ.cost,
+                item: {
+                    img: selectedItem.img,
+                    name: selectedItem.name,
+                    desc: selectedItem.desc
+                },
+                dragonBalls: selectedDragonBalls
             };
 
             const playerDoc = await playerRef.get();
-            const existing = playerDoc.exists && Array.isArray(playerDoc.data().champs) ? playerDoc.data().champs : [];
+            const existing = playerDoc.exists && Array.isArray(playerDoc.data().champs)
+                ? playerDoc.data().champs : [];
 
             await playerRef.update({
                 champs: [...existing, selectedChamp]
