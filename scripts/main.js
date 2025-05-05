@@ -55,6 +55,21 @@ const environments = [
     }
 ];
 
+function incrementAugmentRollCount(uid) {
+    const ref = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(uid);
+    ref.update({
+        augmentRollCount: firebase.firestore.FieldValue.increment(1)
+    });
+}
+
+function incrementChampRollCount(uid) {
+    const ref = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(uid);
+    ref.update({
+        champRollCount: firebase.firestore.FieldValue.increment(1)
+    });
+}
+
+
 function checkJoinStatus() {
     const user = firebase.auth().currentUser;
     const userId = user.uid;
@@ -68,6 +83,46 @@ function checkJoinStatus() {
             }
         });
 }
+function handleRollAugment() {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    const playerRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(user.uid);
+
+    playerRef.update({
+        augmentRollCount: firebase.firestore.FieldValue.increment(1)
+    }).then(() => {
+        location.href = "rollAugment.html";
+    });
+}
+
+function handleRollChamp() {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    const playerRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(user.uid);
+
+    playerRef.update({
+        champRollCount: firebase.firestore.FieldValue.increment(1)
+    }).then(() => {
+        location.href = "rollChamp.html";
+    });
+}
+
+function incrementChampRollCount(uid) {
+    const playerRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(uid);
+    playerRef.update({
+        champRollCount: firebase.firestore.FieldValue.increment(1)
+    });
+}
+
+function incrementAugmentRollCount(uid) {
+    const playerRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(uid);
+    playerRef.update({
+        augmentRollCount: firebase.firestore.FieldValue.increment(1)
+    });
+}
+
 
 function getRandomTier() {
     const rand = Math.random();
@@ -257,6 +312,9 @@ function loadTable() {
                 const itemImgs = champs.map(c => c.item ? `<img src="${c.item}" class="item-img" title="Trang bị">` : "").join(" ");
                 const dragonImgs = champs.flatMap(c => (c.dragonBalls || []).map(db => `<img src="${db}" class="db-img" title="Ngọc rồng">`)).join(" ");
 
+                const champRolls = data.champRollCount || 0;
+                const augmentRolls = data.augmentRollCount || 0;
+
                 tr.innerHTML = `
     <td>
         <b>${data.name}</b><br>
@@ -264,7 +322,9 @@ function loadTable() {
         <label>Vàng:</label>
         <input type="number" value="${gold}" min="0"
             onchange="updateGold('${doc.id}', this.value)" style="width: 60px;"><br>
-        <small><b>6 lõi sắp tới:</b> ${nextTiers}</small><br><br>
+        <small><b>6 lõi sắp tới:</b> ${nextTiers}</small><br>
+        <small>Đổi Tướng: ${champRolls} lần</small><br>
+        <small>Đổi Lõi Sức Mạnh: ${augmentRolls} lần</small><br><br>
         ${winButton}
     </td>
     <td>${augmentsHtml}</td>
@@ -272,6 +332,7 @@ function loadTable() {
     <td>${itemImgs}</td>
     <td>${dragonImgs}</td>
 `;
+
 
 
                 tbody.appendChild(tr);
@@ -345,3 +406,4 @@ function hideDesc(id) {
     const box = document.getElementById(id);
     if (box) box.style.display = "none";
 }
+

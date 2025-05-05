@@ -259,12 +259,18 @@ function getRandomDragonBalls() {
 }
 
 function getRandomDragonBalls() {
-    const count = Math.random() < 0.5 ? 1 : 2;
+    const count = Math.random() < 0.8 ? 1 : 2;
     const result = [];
-    for (let i = 0; i < count; i++) {
+    const used = new Set();
+
+    while (result.length < count) {
         const idx = Math.floor(Math.random() * dragonBalls.length);
-        result.push(dragonBalls[idx]);
+        if (!used.has(idx)) {
+            used.add(idx);
+            result.push(dragonBalls[idx]);
+        }
     }
+
     return result;
 }
 

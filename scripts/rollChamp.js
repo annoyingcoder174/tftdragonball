@@ -258,7 +258,6 @@ const champions = {
         { name: "Super Perfect Cell", cost: 9, img: "images/champs/181.webp", tier: "S" },
     ],
     Z: [
-        { name: "Beast Gohan", cost: 12, img: "images/champs/184.webp", tier: "Z" },
         { name: "Legendary SSJ Broly (Z)", cost: 12, img: "images/champs/185.webp", tier: "Z" },
         { name: "Mastered Ultra Instinct Goku", cost: 12, img: "images/champs/186.webp", tier: "Z" },
         { name: "Jiren Full Power", cost: 12, img: "images/champs/187.webp", tier: "Z" },
@@ -267,6 +266,7 @@ const champions = {
         { name: "Corrupted Fused Zamasu", cost: 12, img: "images/champs/190.webp", tier: "Z" },
     ],
     GOD: [
+        { name: "Beast Gohan", cost: 15, img: "images/champs/184.webp", tier: "GOD" },
         { name: "Beerus", cost: 15, img: "images/champs/191.webp", tier: "GOD" },
         { name: "Whis", cost: 15, img: "images/champs/192.webp", tier: "GOD" },
         { name: "SSGSS Vegito", cost: 15, img: "images/champs/193.webp", tier: "GOD" },

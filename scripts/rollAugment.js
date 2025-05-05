@@ -189,7 +189,7 @@ const augments = {
         },
         {
             name: "Giải đấu Âm Giới",
-            desc: "-2 ô tướng để gây gấp đôi sát thương đến cuối trận.",
+            desc: "-2 ô tướng để gây gấp đôi sát thương đến cuối trận. Nhận 5/7/10 vàng.",
             img: "images/augments/34.webp"
         },
         {

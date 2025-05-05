@@ -26,11 +26,12 @@
         </div>
 
         <div id="post-join-buttons" style="display: none;" class="button-group">
-            <button onclick="location.href='rollAugment.html'">🎲 Đổi lõi sức mạnh</button>
-            <button onclick="location.href='rollChamp.html'">👊 Đổi tướng</button>
+            <button onclick="handleRollAugment()">🎲 Đổi lõi sức mạnh</button>
+            <button onclick="handleRollChamp()">👊 Đổi tướng</button>
             <button onclick="location.href='shop.html'">🛒 Đi Chợ</button>
             <button onclick="location.href='roll.html'">🎲 Máy Quay Toàn Năng</button>
         </div>
+
 
         <h2>Bảng đấu hiện tại</h2>
 
@@ -46,10 +47,29 @@
             </thead>
             <tbody></tbody>
         </table>
+
         <button onclick="location.href='history.html'">📜 Xem lịch sử</button>
         <h2>Bảng đã tham gia</h2>
         <div id="previous-tables">Đang tải...</div>
     </div>
+
+    <script>
+        function handleRollAugment() {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                incrementAugmentRollCount(user.uid);
+                location.href = 'rollAugment.html';
+            }
+        }
+
+        function handleRollChamp() {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                incrementChampRollCount(user.uid);
+                location.href = 'rollChamp.html';
+            }
+        }
+    </script>
 </body>
 
 </html>
