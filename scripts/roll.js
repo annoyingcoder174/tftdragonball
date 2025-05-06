@@ -306,13 +306,18 @@ const augments = {
         },
         {
             name: "Lời Hiệu Triệu Satan",
-            desc: "Nhận 1 ấn ngẫu nhiên",
+            desc: "Nhận 1 ấn ngẫu nhiên.",
             img: "images/augments/18.webp"
         },
         {
             name: "Cha con Panzy",
             desc: "Nhận 1 Panzy, +3/5/12 vàng mỗi vòng khi có Panzy trong đội hình.",
             img: "images/augments/59.jpg"
+        },
+        {
+            name: "Cảnh Sát Trưởng - Krillin",
+            desc: "Nhận 1 lõi S ngẫu nhiên.",
+            img: "images/augments/62.jpg"
         },
 
     ],
@@ -402,6 +407,16 @@ const augments = {
             desc: "Nhận Gamma 1 & 2, người chơi bị -3 ô tướng cho đến khi có Cell Max. Nhận 1 Cell Max ở vòng 6.<br>Mỗi vòng thắng người chơi được +3 vàng/khoảng cách tướng.",
             img: "images/augments/58.webp"
         },
+        {
+            name: "Tamagamis",
+            desc: "Lập chuỗi thắng 3 để nhận 3 viên Ngọc Rồng chưa sở hữu.",
+            img: "images/augments/60.webp"
+        },
+        {
+            name: "Nâng Cấp Tối Cao",
+            desc: "Nhận 1 Lõi Z bất kì.",
+            img: "images/augments/61.jpg"
+        },
 
     ],
     Z: [
@@ -422,7 +437,7 @@ const augments = {
         },
         {
             name: "Điều ước cuối cùng của Goku",
-            desc: "Khi người chơi thua, họ sẽ không, thay vào đó, nhận 1 Goku GT SSJ4(và phải sử dụng nó), 15 vàng, và 1 điểm sinh mệnh. Tới cuối trận, người chơi gây thêm 20 thiệt hại lên đối phương.",
+            desc: "Khi người chơi thua, họ sẽ không, thay vào đó, nhận 1 Goku GT SSJ4(và phải sử dụng nó), 30 vàng, và 1 điểm sinh mệnh. Tới cuối trận, người chơi gây thêm 20 thiệt hại lên đối phương.",
             img: "images/augments/38.webp"
         },
         {
@@ -452,7 +467,7 @@ const augments = {
         },
         {
             name: "Thần Rồng Khói Đen",
-            desc: "Lượng vàng hiện tại và lượng vàng kiếm được sẽ chuyển thành điểm sinh mệnh. Người chơi có thể sử dụng điểm sinh mệnh để mua bất cứ điều gì. +3/5/8 điểm sinh mệnh mỗi vòng đấu.",
+            desc: "Lượng vàng hiện tại và lượng vàng kiếm được sẽ chuyển thành điểm sinh mệnh. Người chơi có thể sử dụng điểm sinh mệnh để mua bất cứ điều gì. +2/4/6 điểm sinh mệnh mỗi vòng đấu.",
             img: "images/augments/44.webp"
         },
         {
@@ -520,6 +535,12 @@ const augments = {
             desc: "+50 điểm sinh mệnh, người chơi gây thêm 10/15/20 sát thương mỗi vòng. Nhận 10/15/20 vàng.",
             img: "images/augments/57.png"
         },
+        {
+            name: "Rồng Thần Siêu Cấp",
+            desc: "Nhận 1 Ngọc Rồng ngẫu nhiên chưa sở hữu. Tất cả Ngọc Rồng trở thành Ngọc Rồng Siêu Cấp.<br>Người chơi lập tức thắng trận đấu khi có 7 viên Ngọc Rồng Siêu Cấp.",
+            img: "images/augments/63.webp"
+        },
+
 
     ]
 };

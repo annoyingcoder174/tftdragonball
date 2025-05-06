@@ -125,13 +125,18 @@ const augments = {
         },
         {
             name: "Lời Hiệu Triệu Satan",
-            desc: "Nhận 1 ấn ngẫu nhiên",
+            desc: "Nhận 1 ấn ngẫu nhiên.",
             img: "images/augments/18.webp"
         },
         {
             name: "Cha con Panzy",
             desc: "Nhận 1 Panzy, +3/5/12 vàng mỗi vòng khi có Panzy trong đội hình.",
             img: "images/augments/59.jpg"
+        },
+        {
+            name: "Cảnh Sát Trưởng - Krillin",
+            desc: "Nhận 1 lõi S ngẫu nhiên.",
+            img: "images/augments/62.jpg"
         },
 
     ],
@@ -220,6 +225,16 @@ const augments = {
             name: "Thiên tài bác học Hedo",
             desc: "Nhận Gamma 1 & 2, người chơi bị -3 ô tướng cho đến khi có Cell Max. Nhận 1 Cell Max ở vòng 6.<br>Mỗi vòng thắng người chơi được +3 vàng/khoảng cách tướng.",
             img: "images/augments/58.webp"
+        },
+        {
+            name: "Tamagamis",
+            desc: "Lập chuỗi thắng 3 để nhận 3 viên Ngọc Rồng chưa sở hữu.",
+            img: "images/augments/60.webp"
+        },
+        {
+            name: "Nâng Cấp Tối Cao",
+            desc: "Nhận 1 Lõi Z bất kì.",
+            img: "images/augments/61.jpg"
         },
 
     ],
@@ -339,6 +354,12 @@ const augments = {
             desc: "+50 điểm sinh mệnh, người chơi gây thêm 10/15/20 sát thương mỗi vòng. Nhận 10/15/20 vàng.",
             img: "images/augments/57.png"
         },
+        {
+            name: "Rồng Thần Siêu Cấp",
+            desc: "Nhận 1 Ngọc Rồng ngẫu nhiên chưa sở hữu. Tất cả Ngọc Rồng trở thành Ngọc Rồng Siêu Cấp.<br>Người chơi lập tức thắng trận đấu khi có 7 viên Ngọc Rồng Siêu Cấp.",
+            img: "images/augments/63.webp"
+        },
+
 
     ]
 };
