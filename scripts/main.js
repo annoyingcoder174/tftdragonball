@@ -395,9 +395,9 @@ async function loadTable() {
         ];
         const currentLevel = levelTable.find(l => currentExp >= l.exp)?.lvl || 1;
         const levelText = `
-    <small><b>Level hiện tại:</b> ${data.level ?? "?"}</small><br>
-    <small><b>EXP hiện tại:</b> ${data.exp ?? "?"}</small><br>
-    <small><b>HP hiện tại:</b> ${data.hp ?? "?"}</small><br>
+    <small><b>Cấp độ hiện tại:</b> ${data.level ?? "1"}</small><br>
+    <small><b>Kinh nghiệm hiện tại:</b> ${data.exp ?? "100"}</small><br>
+    <small><b>Điểm sinh mệnh hiện tại:</b> ${data.hp ?? "120"}</small><br>
     ${levels ? `<small><b>Level(s):</b> ${levels}</small><br>` : ""}
 `;
 
@@ -558,8 +558,8 @@ function calculateOmni() {
       👉 <b>Tổng Kinh Nghiệm: ${totalExp}</b><br>
       👉 <b>Level mới: ${newLevel}</b><br><br>
 
-      <b>❤️ Máu:</b><br>
-      ${gap > 0 ? `-<b>${totalDMG}</b> máu<br>👉 Máu còn: <b>${finalHP}</b>` : `✅ Không mất máu`}
+      <b>❤️ Điểm sinh mệnh:</b><br>
+      ${gap > 0 ? `-<b>${totalDMG}</b> điểm sinh mệnh<br>👉 Điểm sinh mệnh còn: <b>${finalHP}</b>` : `✅ Không có thiệt hại`}
     `;
 
     // Save to Firestore
