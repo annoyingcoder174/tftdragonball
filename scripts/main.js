@@ -247,14 +247,14 @@ function loadPreviousTables() {
         }
 
         container.innerHTML = "";
-        tables.forEach(table => {
-            const btn = document.createElement("button");
-            btn.innerText = `🔁 Tiếp tục bảng: ${table}`;
-            btn.onclick = () => {
-                alert(`Tính năng tiếp tục bảng '${table}' đang được phát triển.`);
-            };
-            container.appendChild(btn);
-        });
+        // tables.forEach(table => {
+        //     const btn = document.createElement("button");
+        //     btn.innerText = `🔁 Tiếp tục bảng: ${table}`;
+        //     btn.onclick = () => {
+        //         alert(`Tính năng tiếp tục bảng '${table}' đang được phát triển.`);
+        //     };
+        //     container.appendChild(btn);
+        // });
     });
 }
 async function fetchAugmentStats() {
