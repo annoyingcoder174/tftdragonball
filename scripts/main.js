@@ -508,6 +508,7 @@ function calculateOmni() {
     const g = parseInt(document.getElementById("omniGold").value);
     const exp = parseInt(document.getElementById("omniExp").value);
     const hp = parseInt(document.getElementById("omniHP").value);
+    const hpBonus = parseInt(document.getElementById("omniHPBonus").value);
     const win = parseInt(document.getElementById("omniWin").value);
     const lose = parseInt(document.getElementById("omniLose").value);
     const gap = parseInt(document.getElementById("omniGap").value);
@@ -534,7 +535,7 @@ function calculateOmni() {
     // Final stats
     const totalGold = g + goldBase + winBonus + loseBonus + interest;
     const totalExp = exp + expBase;
-    const finalHP = hp - (gap > 0 ? totalDMG : 0);
+    const finalHP = hp - (gap > 0 ? totalDMG : 0) + hpBonus;
 
     // Level mapping from exp
     const levelTable = [
