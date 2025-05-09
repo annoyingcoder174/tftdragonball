@@ -6,12 +6,12 @@ const tierChances = {
     1: { D: 84, C: 15, dragonBall: 1 },
     2: { D: 59, C: 25, B: 15, dragonBall: 1 },
     3: { D: 40, C: 35, B: 22, A: 1, dragonBall: 2 },
-    4: { D: 25, C: 32, B: 30, A: 10, dragonBall: 3 },
-    5: { D: 15, C: 29, B: 25, A: 20, S: 10, Z: 1, dragonBall: 5 },
-    6: { D: 12, C: 15, B: 20, A: 30, S: 12, Z: 6, dragonBall: 5 },
-    7: { D: 7.5, C: 15, B: 15, A: 25, S: 20, Z: 11, GOD: 0.5, dragonBall: 6 },
-    8: { D: 5, C: 9, B: 15, A: 20.5, S: 22, Z: 18, GOD: 3, dragonBall: 7.5 },
-    9: { D: 3.5, C: 7, B: 10, A: 20, S: 25, Z: 20, GOD: 4.5, dragonBall: 10 }
+    4: { D: 25, C: 33, B: 30, A: 10, dragonBall: 2 },
+    5: { D: 15, C: 30, B: 26, A: 21, S: 10, Z: 1, dragonBall: 3 },
+    6: { D: 12, C: 15, B: 20, A: 30, S: 14, Z: 6, dragonBall: 3 },
+    7: { D: 7.5, C: 15, B: 15, A: 25, S: 22, Z: 11, GOD: 0.5, dragonBall: 4 },
+    8: { D: 5, C: 9, B: 15, A: 20.5, S: 24, Z: 18.5, GOD: 3, dragonBall: 5 },
+    9: { D: 3.5, C: 7, B: 10, A: 20, S: 27, Z: 22, GOD: 4.5, dragonBall: 6 }
 };
 const dragonBallPool = [
     { name: "Ngọc Rồng 1 Sao", cost: 0, img: "images/dragonballs/1.png", tier: "dragonBall" },
@@ -351,12 +351,12 @@ function showTierPercentages(level) {
         1: [{ tier: "D", rate: 84 }, { tier: "C", rate: 15 }, { tier: "dragonBall", rate: 1 }],
         2: [{ tier: "D", rate: 59 }, { tier: "C", rate: 25 }, { tier: "B", rate: 15 }, { tier: "dragonBall", rate: 1 }],
         3: [{ tier: "D", rate: 40 }, { tier: "C", rate: 35 }, { tier: "B", rate: 22 }, { tier: "A", rate: 1 }, { tier: "dragonBall", rate: 2 }],
-        4: [{ tier: "D", rate: 25 }, { tier: "C", rate: 32 }, { tier: "B", rate: 30 }, { tier: "A", rate: 10 }, { tier: "dragonBall", rate: 3 }],
-        5: [{ tier: "D", rate: 15 }, { tier: "C", rate: 29 }, { tier: "B", rate: 25 }, { tier: "A", rate: 20 }, { tier: "S", rate: 10 }, { tier: "Z", rate: 1 }, { tier: "dragonBall", rate: 5 }],
-        6: [{ tier: "D", rate: 12 }, { tier: "C", rate: 15 }, { tier: "B", rate: 20 }, { tier: "A", rate: 30 }, { tier: "S", rate: 12 }, { tier: "Z", rate: 6 }, { tier: "dragonBall", rate: 5 }],
-        7: [{ tier: "D", rate: 7.5 }, { tier: "C", rate: 15 }, { tier: "B", rate: 15 }, { tier: "A", rate: 25 }, { tier: "S", rate: 20 }, { tier: "Z", rate: 11 }, { tier: "GOD", rate: 0.5 }, { tier: "dragonBall", rate: 6 }],
-        8: [{ tier: "D", rate: 5 }, { tier: "C", rate: 9 }, { tier: "B", rate: 15 }, { tier: "A", rate: 20.5 }, { tier: "S", rate: 22 }, { tier: "Z", rate: 18 }, { tier: "GOD", rate: 3 }, { tier: "dragonBall", rate: 7.5 }],
-        9: [{ tier: "D", rate: 3.5 }, { tier: "C", rate: 7 }, { tier: "B", rate: 10 }, { tier: "A", rate: 20 }, { tier: "S", rate: 25 }, { tier: "Z", rate: 20 }, { tier: "GOD", rate: 4.5 }, { tier: "dragonBall", rate: 10 }]
+        4: [{ tier: "D", rate: 25 }, { tier: "C", rate: 33 }, { tier: "B", rate: 30 }, { tier: "A", rate: 10 }, { tier: "dragonBall", rate: 2 }],
+        5: [{ tier: "D", rate: 15 }, { tier: "C", rate: 30 }, { tier: "B", rate: 26 }, { tier: "A", rate: 21 }, { tier: "S", rate: 10 }, { tier: "Z", rate: 1 }, { tier: "dragonBall", rate: 3 }],
+        6: [{ tier: "D", rate: 12 }, { tier: "C", rate: 15 }, { tier: "B", rate: 20 }, { tier: "A", rate: 30 }, { tier: "S", rate: 14 }, { tier: "Z", rate: 6 }, { tier: "dragonBall", rate: 3 }],
+        7: [{ tier: "D", rate: 7.5 }, { tier: "C", rate: 15 }, { tier: "B", rate: 15 }, { tier: "A", rate: 25 }, { tier: "S", rate: 22 }, { tier: "Z", rate: 11 }, { tier: "GOD", rate: 0.5 }, { tier: "dragonBall", rate: 4 }],
+        8: [{ tier: "D", rate: 5 }, { tier: "C", rate: 9 }, { tier: "B", rate: 15 }, { tier: "A", rate: 20.5 }, { tier: "S", rate: 24 }, { tier: "Z", rate: 18.5 }, { tier: "GOD", rate: 3 }, { tier: "dragonBall", rate: 5 }],
+        9: [{ tier: "D", rate: 3.5 }, { tier: "C", rate: 7 }, { tier: "B", rate: 10 }, { tier: "A", rate: 20 }, { tier: "S", rate: 27 }, { tier: "Z", rate: 22 }, { tier: "GOD", rate: 4.5 }, { tier: "dragonBall", rate: 6 }]
     };
     const rates = tierData[level];
 
