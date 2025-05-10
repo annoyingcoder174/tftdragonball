@@ -231,13 +231,14 @@ const items = [
     { img: "./images/items/2.webp", name: "Thanh Kiếm Dũng Sĩ", desc: "Hồi 5 điểm sinh mệnh với mỗi khoảng cách tướng.", weight: 11.57 },
     { img: "./images/items/3.webp", name: "Giáp Chiến Đấu", desc: "Giảm 40% sát thương nhận vào trong vòng đấu.", weight: 11.57 },
     { img: "./images/items/4.jpg", name: "Kẹo Majin Buu", desc: "Hồi 20 điểm sinh mệnh.", weight: 11.57 },
-    { img: "./images/items/5.webp", name: "Máy đo chỉ số", desc: "Nhận 1 tướng có cùng Bậc với Bậc mạnh nhất của đối phương.", weight: 4 },
-    { img: "./images/items/6.webp", name: "Máy dò Ngọc Rồng", desc: "Nhận 1 ngọc rồng ngẫu nhiên mà người chơi chưa sở hữu.", weight: 5 },
+    { img: "./images/items/5.webp", name: "Máy đo chỉ số", desc: "Nhận 1 tướng có cùng Bậc với Bậc mạnh nhất của đối phương.", weight: 5 },
+    { img: "./images/items/6.webp", name: "Máy dò Ngọc Rồng", desc: "Nhận 1 ngọc rồng ngẫu nhiên mà người chơi chưa sở hữu.", weight: 2 },
     { img: "./images/items/7.webp", name: "Viên con nhộng Capsule", desc: "+2 ô hàng chờ.", weight: 11.57 },
     { img: "./images/items/8.webp", name: "Máy phát sóng Blutz", desc: "Đổi tướng hiện tại lên tướng bậc cao hơn (trừ tướng GOD).", weight: 5 },
     { img: "./images/items/9.webp", name: "Buồng Bay của Frieza", desc: "Tạo 1 lớp khiên bảo vệ 1 tướng.", weight: 11.57 },
     { img: "./images/items/10.webp", name: "Súng năng lượng", desc: "Bắn 1 tướng ngẫu nhiên (trừ tướng bậc Z, God).", weight: 11.57 },
-    { img: "./images/items/11.webp", name: "Máy du hành thời gian", desc: "Nhận tỉ lệ tướng cao hơn 1 bậc trong vòng đấu.", weight: 5 },
+    { img: "./images/items/11.webp", name: "Máy du hành thời gian", desc: "Nhận tỉ lệ tướng cao hơn 1 bậc trong vòng đấu.", weight: 4 },
+    { img: "./images/items/12.webp", name: "Quyền Trượng Thiên Thần", desc: "Nhận 1 bản sao chép của 1 tướng.", weight: 3 },
 ];
 
 

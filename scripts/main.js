@@ -34,17 +34,17 @@ const environments = [
     },
     {
         title: "Hành tinh Vegeta",
-        desc: "Tất cả người chơi có 6 ô tướng, và 4 ô chứa tướng.",
+        desc: "Tất cả người chơi nhận 2 vàng với mỗi khoảng cách tướng khi thắng.",
         img: "/images/environments/3.png"
     },
     {
         title: "Hành tinh Yardrat",
-        desc: "+1 ấn ngẫu nhiên.",
+        desc: "Tất cả người chơi khởi đầu ở vòng đấu 3",
         img: "/images/environments/4.png"
     },
     {
         title: "Hành Tinh Cereal",
-        desc: "+1 trang bị.",
+        desc: "Khi điểm sinh mệnh người chơi xuống 50, nhận tùy chọn 1 trong 2 vật phẩm sau:<br>-1 lõi Z<br>-40 vàng.",
         img: "/images/environments/5.png"
     },
     {
