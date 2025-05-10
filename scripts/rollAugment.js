@@ -40,7 +40,7 @@ const augments = {
     A: [
         {
             name: "Đoàn Quân Ruy Băng Đỏ",
-            desc: "Nhận (12/18/25) vàng trong vòng đấu này nhưng sẽ biến mất khi hết vòng.",
+            desc: "Nhận (18/22/28) vàng trong vòng đấu này nhưng sẽ biến mất khi hết vòng.",
             img: "images/augments/1.jpg"
         },
         {
