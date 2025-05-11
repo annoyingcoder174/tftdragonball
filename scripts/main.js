@@ -122,25 +122,23 @@ function handleRollChamp() {
     const user = firebase.auth().currentUser;
     if (!user) return;
 
+    // Clear the current roll levels and free rolls before navigating to rollChamp.html
+    sessionStorage.removeItem("freeRollsUsed");
+    sessionStorage.removeItem("currentRollLevels");
+
+    // Update the champ roll count
     const playerRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(user.uid);
-
-    // Clear level restrictions in Firestore
     playerRef.update({
-        rollLevels: [], // Clear levels
-        hasRolledOnce: false // Reset free roll status
+        champRollCount: firebase.firestore.FieldValue.increment(1)
     }).then(() => {
-        console.log("🔄 Level restrictions and free rolls reset for user:", user.uid);
-        // Clear local free roll tracking
-        localStorage.removeItem("freeRollsUsed");
-        sessionStorage.removeItem("freeRollsUsed");
-        console.log("🔄 Free roll restrictions cleared locally");
-
-        // Redirect to rollChamp.html
+        console.log("🔄 Level and roll restrictions reset");
         location.href = "rollChamp.html";
-    }).catch(error => {
-        console.error("❌ Error resetting levels:", error);
     });
 }
+
+
+
+
 
 
 
@@ -393,6 +391,7 @@ async function loadTable() {
         //const levelText = levels ? `<small><b>Level(s):</b> ${levels}</small><br>` : "";
 
         const champRolls = data.champRollCount || 0;
+        const champRollText = `<small>Đổi Tướng: ${champRolls} lần</small><br>`;
         const augmentRolls = data.augmentRollCount || 0;
         const currentExp = data.omniExp || 0;
         const levelTable = [
@@ -425,7 +424,7 @@ async function loadTable() {
             <td>
             <b>${data.name}</b><br>
             ${levelText}${hpText}
-            
+            ${champRollText}
 
                 <label>Vàng:</label>
                 <input type="number" value="${gold}" min="0"

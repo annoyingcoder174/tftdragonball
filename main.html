@@ -77,40 +77,6 @@
     </div>
 
 
-    <script>
-        function handleRollAugment() {
-            const user = firebase.auth().currentUser;
-            if (user) {
-                incrementAugmentRollCount(user.uid);
-                location.href = 'rollAugment.html';
-            }
-        }
-
-        function handleRollChamp() {
-            const user = firebase.auth().currentUser;
-            if (!user) return;
-
-            const playerRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(user.uid);
-
-            // Clear level restrictions in Firestore
-            playerRef.update({
-                rollLevels: [], // Clear levels
-                hasRolledOnce: false // Reset free roll status
-            }).then(() => {
-                console.log("🔄 Level restrictions and free rolls reset for user:", user.uid);
-                // Clear local free roll tracking
-                localStorage.removeItem("freeRollsUsed");
-                sessionStorage.removeItem("freeRollsUsed");
-                console.log("🔄 Free roll restrictions cleared locally");
-
-                // Redirect to rollChamp.html
-                location.href = "rollChamp.html";
-            }).catch(error => {
-                console.error("❌ Error resetting levels:", error);
-            });
-        }
-
-
 
     </script>
 </body>

@@ -318,98 +318,7 @@ function getRandomTier(level) {
     return "D"; // Fallback
 }
 
-
 let freeRollsUsed = new Set();
-
-function handleLevelInput() {
-    const level = parseInt(document.getElementById("player-level").value);
-    if (!level || level < 1 || level > 9) return;
-
-    const user = firebase.auth().currentUser;
-    if (!user) return;
-
-    const playerRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(user.uid);
-
-    playerRef.get().then(doc => {
-        if (!doc.exists) return;
-
-        const data = doc.data();
-        const storedLevels = new Set(data.rollLevels || []);
-
-        // Prevent adding more than 2 levels
-        if (currentRollLevels.size >= 2 && !currentRollLevels.has(level)) {
-            alert("❌ Chỉ được chọn tối đa 2 cấp độ cùng lúc! Vui lòng hoàn tất trước khi chọn cấp độ khác.");
-            return;
-        }
-
-        // Add the new level if not already selected
-        if (!storedLevels.has(level) || !currentRollLevels.has(level)) {
-            currentRollLevels.add(level);
-
-            // Update levels in Firestore (only if it's a new level)
-            const updatedLevels = Array.from(new Set([...storedLevels, level])).sort((a, b) => a - b);
-            playerRef.update({
-                rollLevels: updatedLevels
-            }).then(() => {
-                console.log("✅ Levels updated in table:", updatedLevels);
-                loadTable(); // Refresh the main table to reflect the level changes
-            });
-        }
-
-        showTierPercentages(level);
-
-        // Free roll logic without deducting gold
-        if (!freeRollsUsed.has(level)) {
-            const rolled = Array.from({ length: 5 }, () => {
-                const tier = getRandomTier(level);
-
-                if (tier === "dragonBall") {
-                    const dbIndex = Math.floor(Math.random() * 7) + 1;
-                    return {
-                        name: `Ngọc Rồng ${dbIndex} Sao`,
-                        tier: "dragonBall",
-                        cost: 0,
-                        img: `images/dragonballs/${dbIndex}.png`
-                    };
-                }
-
-                const pool = champions[tier];
-                if (!pool || pool.length === 0) {
-                    console.warn(`No champions found for tier: ${tier}`);
-                    return null;
-                }
-
-                return { ...pool[Math.floor(Math.random() * pool.length)] };
-            }).filter(c => c); // Remove nulls
-
-            displayChampions(rolled);
-
-            // Mark this level as free-rolled
-            freeRollsUsed.add(level);
-            console.log("✅ Free champions rolled for level:", level);
-        }
-    });
-}
-
-
-// Reset free roll and level restrictions on "Hoàn Tất" or "Thoát"
-// Reset free roll and level restrictions on "Hoàn Tất" or "Thoát"
-function resetLevelRestrictions() {
-    freeRollsUsed.clear();
-    currentRollLevels.clear();
-
-    console.log("🔄 Free roll and level restrictions reset");
-}
-
-// Attach reset to buttons
-document.addEventListener("DOMContentLoaded", () => {
-    const finishButton = document.querySelector("button[onclick='finishRolling()']");
-    const exitButton = document.querySelector("button[onclick='exitToMain()']");
-
-    if (finishButton) finishButton.addEventListener("click", resetLevelRestrictions);
-    if (exitButton) exitButton.addEventListener("click", resetLevelRestrictions);
-});
-
 
 // Initialize levels on page load to maintain state across refreshes
 firebase.auth().onAuthStateChanged(user => {
@@ -425,6 +334,112 @@ firebase.auth().onAuthStateChanged(user => {
     }
 });
 
+// Track selected levels per session
+let selectedLevels = new Set();
+
+// Clear levels on page load to reset the restriction
+window.addEventListener("load", () => {
+    selectedLevels.clear();
+    console.log("🔄 Level restrictions reset on page load");
+});
+
+function handleLevelInput() {
+    const level = parseInt(document.getElementById("player-level").value);
+    if (!level || level < 1 || level > 9) return;
+
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    const playerRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(user.uid);
+
+    playerRef.get().then(doc => {
+        if (!doc.exists) return;
+
+        const data = doc.data();
+        const currentLevels = new Set(data.rollLevels || []);
+
+        // Restrict to 2 levels but reset on page reload
+        if (selectedLevels.size >= 2 && !selectedLevels.has(level)) {
+            alert("❌ Chỉ được chọn tối đa 2 cấp độ cùng lúc! Vui lòng hoàn tất trước khi chọn cấp độ khác.");
+            return;
+        }
+
+        // Add the new level
+        selectedLevels.add(level);
+        currentLevels.add(level);
+
+        // Save levels to Firestore
+        playerRef.update({
+            rollLevels: Array.from(currentLevels).sort((a, b) => a - b)
+        }).then(() => {
+            console.log("✅ Levels updated:", Array.from(currentLevels));
+        });
+
+        showTierPercentages(level);
+        freeRollChampions(level);
+    });
+}
+
+// Free roll champions without deducting gold
+function freeRollChampions(level) {
+    const rolled = Array.from({ length: 5 }, () => {
+        const tier = getRandomTier(level);
+
+        if (tier === "dragonBall") {
+            const dbIndex = Math.floor(Math.random() * 7) + 1;
+            return {
+                name: `Ngọc Rồng ${dbIndex} Sao`,
+                tier: "dragonBall",
+                cost: 0,
+                img: `images/dragonballs/${dbIndex}.png`
+            };
+        }
+
+        const pool = champions[tier];
+        if (!pool || pool.length === 0) {
+            console.warn(`No champions found for tier: ${tier}`);
+            return null;
+        }
+
+        return { ...pool[Math.floor(Math.random() * pool.length)] };
+    }).filter(c => c);
+
+    displayChampions(rolled);
+    console.log("✅ Free champions rolled for level:", level);
+}
+
+// Allow rolling for new champs without restriction
+document.addEventListener("keydown", (event) => {
+    if (event.key.toUpperCase() === "D") {
+        rollChampions();
+    }
+});
+
+
+// Reset level restrictions on exit or complete
+function resetLevelRestrictions() {
+    currentRollLevels.clear();
+    console.log("🔄 Level restrictions reset");
+}
+
+// Attach reset to buttons
+document.addEventListener("DOMContentLoaded", () => {
+    const finishButton = document.querySelector("button[onclick='finishRolling()']");
+    const exitButton = document.querySelector("button[onclick='exitToMain()']");
+    const rollButton = document.querySelector("button[onclick='handleRollChamp()']");
+
+    if (finishButton) finishButton.addEventListener("click", resetLevelRestrictions);
+    if (exitButton) exitButton.addEventListener("click", resetLevelRestrictions);
+    if (rollButton) rollButton.addEventListener("click", resetLevelRestrictions);
+});
+
+// Reset levels when entering rollChamp.html
+document.addEventListener("DOMContentLoaded", () => {
+    currentRollLevels.clear(); // Clear levels on fresh page load
+    console.log("🔄 Cleared levels on page load");
+});
+
+
 
 // Update the levels in the main table
 function updatePlayerLevels(userId, levels) {
@@ -437,6 +452,16 @@ function updatePlayerLevels(userId, levels) {
         loadTable(); // Refresh the main table to reflect the level changes
     }).catch(error => console.error("❌ Error updating levels:", error));
 }
+
+// Clear levels when opening the page
+function clearLevelRestrictionsOnPageLoad() {
+    freeRollsUsed.clear();
+    currentRollLevels.clear();
+    console.log("🔄 Level restrictions cleared on page load");
+}
+
+clearLevelRestrictionsOnPageLoad();
+
 
 
 // Attach reset to buttons
@@ -559,13 +584,13 @@ function rollChampions() {
     const level = parseInt(document.getElementById("player-level").value);
     if (!level || level < 1 || level > 9) return;
 
-    if (!currentRollLevels.has(level)) {
-        if (currentRollLevels.size >= 2) {
-            alert("Chỉ được dùng tối đa 2 cấp độ cùng lúc! Nhấn 'Hoàn tất' để reset.");
-            return;
-        }
-        currentRollLevels.add(level);
-    }
+    // if (!currentRollLevels.has(level)) {
+    //     if (currentRollLevels.size >= 2) {
+    //         alert("Chỉ được dùng tối đa 2 cấp độ cùng lúc! Nhấn 'Hoàn tất' để reset.");
+    //         return;
+    //     }
+    //     currentRollLevels.add(level);
+    // }
 
     if (!currentUserRef) return;
 
@@ -712,26 +737,45 @@ async function fetchChampStats() {
 }
 
 
-
 function buyChampion(champ) {
-    if (!currentUserRef) return;
+    const user = firebase.auth().currentUser;
+    if (!user) return;
 
-    currentUserRef.get().then(doc => {
+    const playerRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(user.uid);
+
+    playerRef.get().then(doc => {
         if (!doc.exists) return;
+
         const data = doc.data();
-        const gold = data.gold || 0;
-        if (gold < champ.cost) return;
+        const currentGold = data.gold || 0;
 
-        // Update gold and save champion
-        currentUserRef.update({
-            gold: gold - champ.cost,
-            champs: [...(data.champs || []), champ]
+        // Deduct gold for buying champion
+        if (currentGold < champ.cost) {
+            alert("❌ Không đủ vàng!");
+            return;
+        }
+
+        const updatedChamps = data.champs || [];
+        updatedChamps.push(champ);
+
+        playerRef.update({
+            gold: currentGold - champ.cost,
+            champs: updatedChamps
+        }).then(() => {
+            // Update gold display
+            const goldDisplay = document.getElementById("gold-display");
+            if (goldDisplay) goldDisplay.textContent = `Vàng: ${currentGold - champ.cost}`;
+
+            // Add to local boughtChamps array to avoid full page reload
+            boughtChamps.push(champ);
+            displayBoughtChamps();
+
+            console.log("✅ Champion bought:", champ);
         });
-
-        displayBoughtChamps();
-        document.getElementById("gold-display").textContent = `Vàng: ${gold - champ.cost}`;
-    });
+    }).catch(error => console.error("❌ Error buying champion:", error));
 }
+
+
 
 
 function displayBoughtChamps() {
@@ -770,56 +814,18 @@ function displayBoughtChamps() {
             zIndex: "10"
         });
 
-        removeBtn.addEventListener("click", () => sellChampion(i));
-
-        wrapper.appendChild(img);
-        wrapper.appendChild(removeBtn);
-        container.appendChild(wrapper);
-    });
-}
-function displayBoughtChamps() {
-    const container = document.getElementById("bought-champions");
-    container.innerHTML = "";
-
-    boughtChamps.forEach((champ, i) => {
-        const wrapper = document.createElement("div");
-        wrapper.style.position = "relative";
-        wrapper.style.display = "inline-block";
-        wrapper.style.margin = "6px";
-
-        const img = document.createElement("img");
-        img.src = champ.img;
-        img.alt = champ.name;
-        img.className = `champ-img chess-${champ.tier?.toLowerCase() || 'd'}`;
-        img.title = champ.name;
-
-        const removeBtn = document.createElement("button");
-        removeBtn.textContent = "×";
-        removeBtn.title = "Bán tướng";
-        Object.assign(removeBtn.style, {
-            position: "absolute",
-            top: "-4px",
-            right: "-4px",
-            background: "red",
-            color: "white",
-            border: "none",
-            borderRadius: "50%",
-            width: "16px",
-            height: "16px",
-            fontSize: "10px",
-            lineHeight: "14px",
-            padding: "0",
-            cursor: "pointer",
-            zIndex: "10"
+        removeBtn.addEventListener("click", (e) => {
+            e.stopPropagation(); // Prevent parent click event
+            sellChampion(i);
         });
 
-        removeBtn.addEventListener("click", () => sellChampion(i));
-
         wrapper.appendChild(img);
         wrapper.appendChild(removeBtn);
         container.appendChild(wrapper);
     });
 }
+
+
 
 function sellChampion(index) {
     const champ = boughtChamps[index];
@@ -829,29 +835,38 @@ function sellChampion(index) {
 
     // Remove locally
     boughtChamps.splice(index, 1);
-    displayBoughtChamps();
+    displayBoughtChamps(); // Update UI immediately
 
     // Update Firestore
-    currentUserRef.get().then(doc => {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    const playerRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(user.uid);
+
+    playerRef.get().then(doc => {
         if (!doc.exists) return;
         const data = doc.data();
-        const gold = data.gold || 0;
+        const currentGold = data.gold || 0;
         const currentChamps = data.champs || [];
 
-        // Match champ by image + name to remove from Firestore
+        // Remove the exact champ by matching both name and image
         const updatedChamps = currentChamps.filter(c =>
             !(c.name === champ.name && c.img === champ.img)
         );
 
-        currentUserRef.update({
-            gold: gold + refundGold,
+        playerRef.update({
+            gold: currentGold + refundGold,
             champs: updatedChamps
         }).then(() => {
             const display = document.getElementById("gold-display");
-            if (display) display.textContent = `Vàng: ${gold + refundGold}`;
-        });
-    });
+            if (display) display.textContent = `Vàng: ${currentGold + refundGold}`;
+            console.log("✅ Champion completely removed from Firestore:", champ);
+        }).catch(error => console.error("❌ Error updating Firestore:", error));
+    }).catch(error => console.error("❌ Error fetching player data:", error));
 }
+
+
+
 
 
 
@@ -895,22 +910,37 @@ const timerDuration = 60; // seconds
 let countdown;
 
 function startCountdown() {
-    const startTime = parseInt(localStorage.getItem("champRollStart")) || Date.now();
-    localStorage.setItem("champRollStart", startTime);
+    const timerDuration = 30; // 30 seconds
+    const timerDisplay = document.getElementById("countdown-timer");
+    let timeLeft = timerDuration;
 
-    countdown = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        const timeLeft = timerDuration - elapsed;
+    // Immediately update the timer display
+    if (timerDisplay) {
         timerDisplay.textContent = `⏳ Thời gian còn lại: ${timeLeft}s`;
+    }
+
+    // Start the countdown
+    const countdown = setInterval(() => {
+        timeLeft--;
 
         if (timeLeft <= 0) {
             clearInterval(countdown);
             alert("⏰ Hết thời gian! Trở về bảng chính.");
-            localStorage.removeItem("champRollStart");
             window.location.href = "main.html";
+        } else if (timerDisplay) {
+            timerDisplay.textContent = `⏳ Thời gian còn lại: ${timeLeft}s`;
         }
     }, 1000);
+
+    // Clear the timer when leaving the page
+    window.addEventListener("beforeunload", () => {
+        clearInterval(countdown);
+    });
 }
+
+// Call the function when the page loads
+document.addEventListener("DOMContentLoaded", startCountdown);
+
 
 document.addEventListener("DOMContentLoaded", () => {
     if (!localStorage.getItem("champRollStart")) {
@@ -925,3 +955,15 @@ document.addEventListener("keydown", (event) => {
         rollChampions();
     }
 });
+document.addEventListener("DOMContentLoaded", () => {
+    displayBoughtChamps();
+});
+removeBtn.addEventListener("click", (e) => {
+    e.stopPropagation(); // Prevent parent click event
+    sellChampion(i);
+});
+
+function addChampion(champ) {
+    boughtChamps.push(champ);
+    displayBoughtChamps(); // Update UI immediately
+}
