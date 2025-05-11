@@ -483,58 +483,12 @@ function rollChampions() {
 }
 
 
-function displayChampions(rolled) {
+async function displayChampions(rolled) {
     const container = document.getElementById("champion-options");
     container.innerHTML = "";
 
-    rolled.forEach(champ => {
-        const card = document.createElement("div");
-        card.className = "augment-card";
-        const tier = champ.tier?.toLowerCase();
-        card.classList.add(`card-tier-${tier}`);
-
-
-        if (champ.tier === "Z") {
-            card.classList.add("card-tier-z");
-        }
-        else if (champ.tier === "dragonBall") {
-            card.classList.add("card-tier-dragonball");
-        }
-        else if (champ.tier === "GOD") {
-            card.classList.add("card-tier-god");
-        }
-        else if (champ.tier === "S") {
-            card.classList.add("card-tier-s");
-        }
-
-        const img = document.createElement("img");
-        img.src = champ.img;
-        img.alt = champ.name;
-        const tierClass = `chess-${champ.tier?.toLowerCase() || 'd'}`;
-        img.className = `champ-img ${tierClass}`;
-
-        const name = document.createElement("div");
-        name.className = "augment-name";
-        name.textContent = champ.name;
-
-        const desc = document.createElement("div");
-        desc.className = "augment-desc";
-        desc.innerHTML = `Bậc: ${champ.tier}<br>Giá: ${champ.cost} vàng`;
-
-        const buyBtn = document.createElement("button");
-        buyBtn.textContent = "Mua";
-        buyBtn.onclick = () => buyChampion(champ);
-
-        card.appendChild(img);
-        card.appendChild(name);
-        card.appendChild(desc);
-        card.appendChild(buyBtn);
-        container.appendChild(card);
-    });
-}
-function displayChampions(rolled) {
-    const container = document.getElementById("champion-options");
-    container.innerHTML = "";
+    // Fetch champion stats
+    const champStats = await fetchChampStats();
 
     rolled.forEach((champ, index) => {
         const card = document.createElement("div");
@@ -551,6 +505,15 @@ function displayChampions(rolled) {
         name.className = "augment-name";
         name.textContent = champ.name;
 
+        // Get winrate
+        const stats = champStats[champ.name] || { win: 0, total: 0 };
+        const winRate = stats.total ? Math.round((stats.win / stats.total) * 100) : 0;
+        const tierClass = getTierClass(winRate);
+
+        const winRateDiv = document.createElement("div");
+        winRateDiv.className = `champ-winrate ${tierClass}`;
+        winRateDiv.textContent = `Tỉ lệ thắng: ${winRate}%`;
+
         const desc = document.createElement("div");
         desc.className = "augment-desc";
         desc.innerHTML = `Bậc: ${champ.tier}<br>Giá: ${champ.cost} vàng`;
@@ -559,17 +522,60 @@ function displayChampions(rolled) {
         buyBtn.textContent = "Mua";
         buyBtn.onclick = () => {
             buyChampion(champ);
-            buyBtn.disabled = true; // ⛔ disable after buying
+            buyBtn.disabled = true;
             buyBtn.textContent = "Đã mua";
         };
 
         card.appendChild(img);
         card.appendChild(name);
+        card.appendChild(winRateDiv); // 🏆 Add winrate below name
         card.appendChild(desc);
         card.appendChild(buyBtn);
         container.appendChild(card);
     });
 }
+
+// Helper function for tier class
+function getTierClass(winRate) {
+    if (winRate >= 90) return "tier-title-z";
+    if (winRate >= 80) return "tier-title-s";
+    if (winRate >= 60) return "tier-title-a";
+    if (winRate >= 50) return "tier-title-b";
+    if (winRate >= 30) return "tier-title-c";
+    return "tier-title-d";
+}
+
+// Fetch champion stats
+async function fetchChampStats() {
+    const snapshot = await firebase.firestore().collection("champStats").get();
+    const stats = {};
+    snapshot.forEach(doc => {
+        stats[doc.id] = doc.data();
+    });
+    return stats;
+}
+
+
+// Helper function for tier class
+function getTierClass(winRate) {
+    if (winRate >= 90) return "tier-title-z";
+    if (winRate >= 80) return "tier-title-s";
+    if (winRate >= 60) return "tier-title-a";
+    if (winRate >= 50) return "tier-title-b";
+    if (winRate >= 30) return "tier-title-c";
+    return "tier-title-d";
+}
+
+// Fetch champion stats
+async function fetchChampStats() {
+    const snapshot = await firebase.firestore().collection("champStats").get();
+    const stats = {};
+    snapshot.forEach(doc => {
+        stats[doc.id] = doc.data();
+    });
+    return stats;
+}
+
 
 
 function buyChampion(champ) {
@@ -581,17 +587,17 @@ function buyChampion(champ) {
         const gold = data.gold || 0;
         if (gold < champ.cost) return;
 
-        currentUserRef.update({ gold: gold - champ.cost });
-        boughtChamps.push(champ);
-        displayBoughtChamps();
+        // Update gold and save champion
         currentUserRef.update({
             gold: gold - champ.cost,
-            champs: boughtChamps
+            champs: [...(data.champs || []), champ]
         });
 
+        displayBoughtChamps();
         document.getElementById("gold-display").textContent = `Vàng: ${gold - champ.cost}`;
     });
 }
+
 
 function displayBoughtChamps() {
     const container = document.getElementById("bought-champions");
@@ -778,3 +784,9 @@ document.addEventListener("DOMContentLoaded", () => {
     startCountdown();
 });
 
+// Add keyboard shortcut for rolling champions
+document.addEventListener("keydown", (event) => {
+    if (event.key.toUpperCase() === "D") {
+        rollChampions();
+    }
+});

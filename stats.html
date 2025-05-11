@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Thống kê Dragon Ball Sparkling Zero</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/favicon.png" type="image/png">
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script defer src="scripts/firebaseConfig.js"></script>
+    <script defer src="scripts/champStats.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Thống kê Dragon Ball Sparkling Zero</h1>
+
+        <div class="filter-controls">
+            <input type="text" id="search-bar" placeholder="Nhập tên lõi hoặc tướng..." oninput="applyFilters()">
+            <select id="filter-type" onchange="applyFilters()">
+                <option value="all">Tất cả</option>
+                <option value="augment">Lõi Sức Mạnh</option>
+                <option value="champ">Tướng</option>
+            </select>
+            <select id="filter-tier" onchange="applyFilters()">
+                <option value="all">Tất cả Bậc</option>
+                <option value="D">Bậc D</option>
+                <option value="C">Bậc C</option>
+                <option value="B">Bậc B</option>
+                <option value="A">Bậc A</option>
+                <option value="S">Bậc S</option>
+                <option value="Z">Bậc Z</option>
+                <option value="GOD">Bậc GOD</option>
+            </select>
+        </div>
+        <button onclick="location.href='main.html'">🚪Về Trang Chính</button>
+
+        <div id="stats-container" class="stats-container">
+            Đang tải thống kê...
+        </div>
+    </div>
+</body>
+
+</html>

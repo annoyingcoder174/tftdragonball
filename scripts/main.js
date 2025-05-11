@@ -433,61 +433,76 @@ async function loadTable() {
 }
 
 
+async function fetchChampStats() {
+    const snapshot = await firebase.firestore().collection("champStats").get();
+    const stats = {};
+    snapshot.forEach(doc => {
+        stats[doc.id] = doc.data();
+    });
+    return stats;
+}
 
 
 
-function recordWin(winnerId, winnerName) {
+async function recordWin(winnerId, winnerName) {
     const tableRef = firebase.firestore().collection("tables").doc("sharedTable");
     const playersRef = tableRef.collection("players");
 
-    playersRef.get().then(snapshot => {
-        const players = [];
-        const batch = firebase.firestore().batch();
+    const snapshot = await playersRef.get();
+    const batch = firebase.firestore().batch();
 
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const isWinner = doc.id === winnerId;
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        const isWinner = doc.id === winnerId;
 
-            const updatedAugments = (data.augments || []).map(aug => {
-                const win = aug.win || 0;
-                const total = aug.total || 0;
-                const newWin = isWinner ? win + 1 : win;
-                const newTotal = total + 1;
-
-                const statsRef = firebase.firestore().collection("augmentStats").doc(aug.name);
-                batch.set(statsRef, {
-                    win: isWinner ? firebase.firestore.FieldValue.increment(1) : firebase.firestore.FieldValue.increment(0),
-                    total: firebase.firestore.FieldValue.increment(1)
-                }, { merge: true });
-
-                return { ...aug, win: newWin, total: newTotal };
-            });
-
-            players.push({
-                id: doc.id,
-                name: data.name,
-                result: isWinner ? "win" : "lose",
-                augments: updatedAugments,
-                champs: data.champs || [],
-                gold: data.gold || 0
-            });
-
-            batch.delete(playersRef.doc(doc.id));
+        // Update augments
+        (data.augments || []).forEach(aug => {
+            const statsRef = firebase.firestore().collection("augmentStats").doc(aug.name);
+            batch.set(statsRef, {
+                win: isWinner ? firebase.firestore.FieldValue.increment(1) : firebase.firestore.FieldValue.increment(0),
+                total: firebase.firestore.FieldValue.increment(1)
+            }, { merge: true });
         });
 
-        batch.update(tableRef, { tiers: firebase.firestore.FieldValue.delete() });
-        return batch.commit().then(() => players);
-    }).then(players => {
-        return firebase.firestore().collection("matchHistory").add({
-            winner: { id: winnerId, name: winnerName },
-            timestamp: Date.now(),
-            players
+        // Update champions
+        (data.champs || []).forEach(champ => {
+            const champRef = firebase.firestore().collection("champStats").doc(champ.name);
+            batch.set(champRef, {
+                win: isWinner ? firebase.firestore.FieldValue.increment(1) : firebase.firestore.FieldValue.increment(0),
+                total: firebase.firestore.FieldValue.increment(1)
+            }, { merge: true });
         });
-    }).then(() => {
-        alert(`${winnerName} đã Thắng! Trận đấu kết thúc.`);
-        loadTable();
+
+        // Clear player data after match ends
+        batch.delete(playersRef.doc(doc.id));
     });
+
+    // Clear shared table tiers
+    batch.update(tableRef, { tiers: firebase.firestore.FieldValue.delete() });
+
+    // Commit all updates
+    await batch.commit();
+
+    // Save match history
+    await firebase.firestore().collection("matchHistory").add({
+        winner: { id: winnerId, name: winnerName },
+        timestamp: Date.now(),
+        players: snapshot.docs.map(doc => ({
+            id: doc.id,
+            name: doc.data().name,
+            result: doc.id === winnerId ? "win" : "lose",
+            augments: doc.data().augments || [],
+            champs: doc.data().champs || [],
+            gold: doc.data().gold || 0
+        }))
+    });
+
+    alert(`${winnerName} đã Thắng! Trận đấu kết thúc.`);
+    loadTable();
 }
+
+
+
 
 // Tooltip
 function showDesc(id) {
