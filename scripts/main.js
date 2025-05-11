@@ -122,17 +122,27 @@ function handleRollChamp() {
     const user = firebase.auth().currentUser;
     if (!user) return;
 
-    // Clear previous rollChamp timer
-    localStorage.removeItem("champRollStart");
-
     const playerRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(user.uid);
 
+    // Clear level restrictions in Firestore
     playerRef.update({
-        champRollCount: firebase.firestore.FieldValue.increment(1)
+        rollLevels: [], // Clear levels
+        hasRolledOnce: false // Reset free roll status
     }).then(() => {
+        console.log("🔄 Level restrictions and free rolls reset for user:", user.uid);
+        // Clear local free roll tracking
+        localStorage.removeItem("freeRollsUsed");
+        sessionStorage.removeItem("freeRollsUsed");
+        console.log("🔄 Free roll restrictions cleared locally");
+
+        // Redirect to rollChamp.html
         location.href = "rollChamp.html";
+    }).catch(error => {
+        console.error("❌ Error resetting levels:", error);
     });
 }
+
+
 
 function incrementChampRollCount(uid) {
     const playerRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(uid);
@@ -376,7 +386,10 @@ async function loadTable() {
         const winButton = `<button onclick="recordWin('${doc.id}', '${data.name}')">${data.name} Thắng</button>`;
         const nextTiers = data.nextTiers ? data.nextTiers.join(", ") : "Không có";
         const gold = data.gold ?? 0;
-        const levels = (data.rollLevels || []).join(", ");
+        // Sort levels from smallest to largest before displaying
+        // Sort levels before displaying
+        const levels = (data.rollLevels || []).sort((a, b) => a - b).join(", ");
+
         //const levelText = levels ? `<small><b>Level(s):</b> ${levels}</small><br>` : "";
 
         const champRolls = data.champRollCount || 0;

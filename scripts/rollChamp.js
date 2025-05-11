@@ -2,6 +2,7 @@ let currentRollLevels = new Set();
 let currentUserRef = null;
 let boughtChamps = [];
 
+
 const tierChances = {
     1: { D: 84, C: 15, dragonBall: 1 },
     2: { D: 59, C: 25, B: 15, dragonBall: 1 },
@@ -78,6 +79,16 @@ firebase.auth().onAuthStateChanged(async user => {
         firebase.auth().signInAnonymously();
     }
 });
+
+// Reset free roll restrictions when entering rollChamp.html
+// Reset free roll tracking on entering rollChamp.html
+document.addEventListener("DOMContentLoaded", () => {
+    localStorage.removeItem("freeRollsUsed");
+    sessionStorage.removeItem("freeRollsUsed");
+    console.log("🔄 Free roll restrictions reset on entering rollChamp.html");
+});
+
+
 
 
 
@@ -307,29 +318,152 @@ function getRandomTier(level) {
     return "D"; // Fallback
 }
 
+
+let freeRollsUsed = new Set();
+
 function handleLevelInput() {
-    const levelInput = document.getElementById("player-level");
-    const level = parseInt(levelInput.value);
+    const level = parseInt(document.getElementById("player-level").value);
     if (!level || level < 1 || level > 9) return;
 
-    // Check if the level is already in the set
-    if (currentRollLevels.has(level)) {
-        alert("⚠️ Bạn đã chọn cấp độ này rồi!");
-        return;
-    }
+    const user = firebase.auth().currentUser;
+    if (!user) return;
 
-    // Prevent adding more than 2 levels
-    if (currentRollLevels.size >= 2) {
-        alert("❌ Chỉ được chọn tối đa 2 cấp độ cùng lúc! Vui lòng hoàn tất trước khi chọn cấp độ khác.");
-        return;
-    }
+    const playerRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(user.uid);
 
-    // Add the new level
-    currentRollLevels.add(level);
-    showTierPercentages(level);
-    rollChampions(level, 5);
-    saveRollLevel(level);
+    playerRef.get().then(doc => {
+        if (!doc.exists) return;
+
+        const data = doc.data();
+        const storedLevels = new Set(data.rollLevels || []);
+
+        // Prevent adding more than 2 levels
+        if (currentRollLevels.size >= 2 && !currentRollLevels.has(level)) {
+            alert("❌ Chỉ được chọn tối đa 2 cấp độ cùng lúc! Vui lòng hoàn tất trước khi chọn cấp độ khác.");
+            return;
+        }
+
+        // Add the new level if not already selected
+        if (!storedLevels.has(level) || !currentRollLevels.has(level)) {
+            currentRollLevels.add(level);
+
+            // Update levels in Firestore (only if it's a new level)
+            const updatedLevels = Array.from(new Set([...storedLevels, level])).sort((a, b) => a - b);
+            playerRef.update({
+                rollLevels: updatedLevels
+            }).then(() => {
+                console.log("✅ Levels updated in table:", updatedLevels);
+                loadTable(); // Refresh the main table to reflect the level changes
+            });
+        }
+
+        showTierPercentages(level);
+
+        // Free roll logic without deducting gold
+        if (!freeRollsUsed.has(level)) {
+            const rolled = Array.from({ length: 5 }, () => {
+                const tier = getRandomTier(level);
+
+                if (tier === "dragonBall") {
+                    const dbIndex = Math.floor(Math.random() * 7) + 1;
+                    return {
+                        name: `Ngọc Rồng ${dbIndex} Sao`,
+                        tier: "dragonBall",
+                        cost: 0,
+                        img: `images/dragonballs/${dbIndex}.png`
+                    };
+                }
+
+                const pool = champions[tier];
+                if (!pool || pool.length === 0) {
+                    console.warn(`No champions found for tier: ${tier}`);
+                    return null;
+                }
+
+                return { ...pool[Math.floor(Math.random() * pool.length)] };
+            }).filter(c => c); // Remove nulls
+
+            displayChampions(rolled);
+
+            // Mark this level as free-rolled
+            freeRollsUsed.add(level);
+            console.log("✅ Free champions rolled for level:", level);
+        }
+    });
 }
+
+
+// Reset free roll and level restrictions on "Hoàn Tất" or "Thoát"
+// Reset free roll and level restrictions on "Hoàn Tất" or "Thoát"
+function resetLevelRestrictions() {
+    freeRollsUsed.clear();
+    currentRollLevels.clear();
+
+    console.log("🔄 Free roll and level restrictions reset");
+}
+
+// Attach reset to buttons
+document.addEventListener("DOMContentLoaded", () => {
+    const finishButton = document.querySelector("button[onclick='finishRolling()']");
+    const exitButton = document.querySelector("button[onclick='exitToMain()']");
+
+    if (finishButton) finishButton.addEventListener("click", resetLevelRestrictions);
+    if (exitButton) exitButton.addEventListener("click", resetLevelRestrictions);
+});
+
+
+// Initialize levels on page load to maintain state across refreshes
+firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+        const playerRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(user.uid);
+        playerRef.get().then(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                currentRollLevels = new Set(data.rollLevels || []);
+                console.log("🔄 Restored levels:", Array.from(currentRollLevels));
+            }
+        });
+    }
+});
+
+
+// Update the levels in the main table
+function updatePlayerLevels(userId, levels) {
+    const tableRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(userId);
+
+    tableRef.update({
+        rollLevels: levels
+    }).then(() => {
+        console.log("🔄 Updated levels in main table:", levels);
+        loadTable(); // Refresh the main table to reflect the level changes
+    }).catch(error => console.error("❌ Error updating levels:", error));
+}
+
+
+// Attach reset to buttons
+document.addEventListener("DOMContentLoaded", () => {
+    const finishButton = document.querySelector("button[onclick='finishRolling()']");
+    const exitButton = document.querySelector("button[onclick='exitToMain()']");
+
+    if (finishButton) finishButton.addEventListener("click", resetLevelRestrictions);
+    if (exitButton) exitButton.addEventListener("click", resetLevelRestrictions);
+});
+
+
+// Initialize levels on page load to maintain state across refreshes
+firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+        const playerRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(user.uid);
+        playerRef.get().then(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                currentRollLevels = new Set(data.rollLevels || []);
+                console.log("🔄 Restored levels:", Array.from(currentRollLevels));
+            }
+        });
+    }
+});
+
+
 
 
 function saveRollLevel(level) {
@@ -358,6 +492,7 @@ function saveRollLevel(level) {
         });
     });
 }
+// Clear free roll restrictions on page load
 
 
 
