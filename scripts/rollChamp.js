@@ -308,16 +308,62 @@ function getRandomTier(level) {
 }
 
 function handleLevelInput() {
-    const level = parseInt(document.getElementById("player-level").value);
+    const levelInput = document.getElementById("player-level");
+    const level = parseInt(levelInput.value);
     if (!level || level < 1 || level > 9) return;
 
-    currentRollLevels.clear(); // Optional: clear previous roll levels on new input
+    // Check if the level is already in the set
+    if (currentRollLevels.has(level)) {
+        alert("⚠️ Bạn đã chọn cấp độ này rồi!");
+        return;
+    }
+
+    // Prevent adding more than 2 levels
+    if (currentRollLevels.size >= 2) {
+        alert("❌ Chỉ được chọn tối đa 2 cấp độ cùng lúc! Vui lòng hoàn tất trước khi chọn cấp độ khác.");
+        return;
+    }
+
+    // Add the new level
     currentRollLevels.add(level);
-
     showTierPercentages(level);
+    rollChampions(level, 5);
+    saveRollLevel(level);
+}
 
-    // Auto-roll 5 champions immediately on input
-    const rolled = Array.from({ length: 5 }, () => {
+
+function saveRollLevel(level) {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    const playerRef = firebase.firestore().collection("tables").doc("sharedTable").collection("players").doc(user.uid);
+
+    playerRef.get().then(doc => {
+        if (!doc.exists) return;
+
+        const currentLevels = doc.data().rollLevels || [];
+
+        // Add the new level and sort
+        const updatedLevels = [...new Set([level, ...currentLevels])]
+            .sort((a, b) => a - b) // Sort levels in ascending order
+            .slice(0, 2); // Keep only the latest 2 levels
+
+        // Save the sorted levels
+        playerRef.update({
+            rollLevels: updatedLevels
+        }).then(() => {
+            console.log("✅ Roll levels updated:", updatedLevels);
+        }).catch(err => {
+            console.error("❌ Error updating roll levels:", err);
+        });
+    });
+}
+
+
+
+
+function rollChampions(level, count = 5) {
+    const rolled = Array.from({ length: count }, () => {
         const tier = getRandomTier(level);
 
         if (tier === "dragonBall") {
@@ -339,10 +385,10 @@ function handleLevelInput() {
         return { ...pool[Math.floor(Math.random() * pool.length)] };
     }).filter(c => c); // Remove nulls
 
-
-
     displayChampions(rolled);
 }
+
+
 
 
 function showTierPercentages(level) {
@@ -676,11 +722,13 @@ function finishRolling() {
     currentUserRef.get().then(doc => {
         if (!doc.exists) return;
 
-        // 🧠 Don't re-save champs! They were already added during buyChampion()
+        // Clear current roll levels
         currentRollLevels.clear();
+
         window.location.href = "main.html";
     });
 }
+
 
 
 function exitToMain() {

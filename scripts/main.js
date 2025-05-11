@@ -376,8 +376,8 @@ async function loadTable() {
         const winButton = `<button onclick="recordWin('${doc.id}', '${data.name}')">${data.name} Thắng</button>`;
         const nextTiers = data.nextTiers ? data.nextTiers.join(", ") : "Không có";
         const gold = data.gold ?? 0;
-        const levels = (data.rollLevels || []).join(" / ");
-        // const levelText = levels ? `<small><b>Level(s):</b> ${levels}</small><br>` : "";
+        const levels = (data.rollLevels || []).join(", ");
+        //const levelText = levels ? `<small><b>Level(s):</b> ${levels}</small><br>` : "";
 
         const champRolls = data.champRollCount || 0;
         const augmentRolls = data.augmentRollCount || 0;
@@ -394,12 +394,14 @@ async function loadTable() {
             { lvl: 1, exp: 100 }
         ];
         const currentLevel = levelTable.find(l => currentExp >= l.exp)?.lvl || 1;
+        //const levels = (data.rollLevels || []).join(" / ");
         const levelText = `
     <small><b>Cấp độ hiện tại:</b> ${data.level ?? "1"}</small><br>
     <small><b>Kinh nghiệm hiện tại:</b> ${data.exp ?? "100"}</small><br>
     <small><b>Điểm sinh mệnh hiện tại:</b> ${data.hp ?? "120"}</small><br>
-    ${levels ? `<small><b>Level(s):</b> ${levels}</small><br>` : ""}
+    ${levels ? `<small><b>Level(s):</b> ${levels}</small><br>` : "<small><b>Level(s):</b> Chưa có</small><br>"}
 `;
+
 
         const hpText = `<small><b></b></small><br>`;
 
